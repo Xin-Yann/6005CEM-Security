@@ -1,0 +1,29 @@
+.container1{
+    display: flex;
+    align-items: center;
+    padding: 30px;
+    background: whitesmoke;
+    border-radius: 25px;
+    margin: 30px;
+}
+
+.container2{
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+    padding: 30px;
+    background: whitesmoke;
+    border-radius: 25px;
+    margin: 30px;
+}
+
+.offerimg{
+    width: 45%;
+}
+
+.offerinfo{
+    padding: 50px;
+    font-size: 24px;
+    font-weight: 100;
+    line-height: 1.5;
+}

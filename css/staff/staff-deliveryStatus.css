@@ -1,0 +1,22 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.btn:hover {
+    background-color: #e7f3ff;
+    color: #01647a;
+}
+
+.btn {
+    background-color: #01647a;
+    color: white;
+}

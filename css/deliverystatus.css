@@ -1,0 +1,19 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th,
+td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.categoryheader{
+	text-align: center;
+    font-family: Catty Pillow Demo;
+    font-size: 50px;
+	padding-top: 40px;
+}

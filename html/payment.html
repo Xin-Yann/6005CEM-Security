@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Mart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+    <link rel="stylesheet" href="/css/payment.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="../css/home-1.css">
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="module" src="/js/firebase-configs.js"></script>
+</head>
+
+<body>
+    <div class="overflow-hidden">
+        <div class="header">
+            <div class="header">
+                <div class="container" id="myHeader">
+                    <div class="row pt-4" id="menu">
+                        <div class="col-lg-8">
+                            <a href="home.html">
+                                <img src="/image/logo.png" height="80" width="auto" />
+                            </a>
+                            <h1 class="title px-2 pt-2">Pet Mart</h1>
+                        </div>
+                        <div class="col-lg-4">
+                            <div id="cart" class="cart-icon">
+                                <i class="fa fa-shopping-bag"></i>
+                                <span id="cartItemCount" class="cart-item-count">0</span>
+                            </div>
+                            <span style="cursor:pointer"><i class="fa fa-user" id="profile"></i></span>
+                            <span style="cursor:pointer"><i class="fa fa-sign-out" id="signOut"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu pt-5">
+                    <a href="home.html">Home</a>
+                    <div class="dropdown">
+                        <a href="#">All Product</a>
+                        <svg fill="#000000" height="24" viewBox="0 1 24 24" width="24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z"></path>
+                            <path d="M0-.75h24v24H0z" fill="none"></path>
+                        </svg>
+                        <div class="dropdown-content" id="menu">
+                            <a href="/html/productdog.html">Dog</a>
+                            <a href="/html/productcat.html">Cat</a>
+                            <a href="/html/producthamster&rabbits.html">Hamster & Rabbits</a>
+                            <a href="/html/productbirds.html">Birds</a>
+                            <a href="/html/productfish&aquatics.html">Fish & Aquatics</a>
+                        </div>
+                    </div>
+                    <a href="/html/offerdetails.html">Offer Details</a>
+                    <a href="/html/orderhistory.html">Order History</a>
+                    <a href="/html/delivery-status.html">Delivery Status</a>
+                    <a href="/html/contact.html">Contact Us</a>
+                </div>
+            </div>
+
+            <div id="profiledetails">
+                <div class="section-center" style="background-color: white;">
+                    <h1 class="title text-center pt-5  pb-5">My Details</h1>
+                    <div class="row">
+                        <div class="profiledetails-form">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="name">Name:</label>
+                                    <input class="form-control" type="text" id="Name" name="Name"
+                                        style="background-color: #eaeaea;" disabled><br>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input class="form-control" type="text" id="Email" name="Email"
+                                        style="background-color: #eaeaea;" disabled><br>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="contact">Contact:</label>
+                                    <input class="form-control" type="text" id="Contact" name="Contact"
+                                        style="background-color: #eaeaea;" disabled><br>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="address">Address:</label>
+                                    <textarea id="Address" class="form-controladdress" cols="40" rows="4"
+                                        style="background-color: #eaeaea;" disabled></textarea><br>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="state">State:</label>
+                                    <input class="form-control" type="text" id="State" name="State"
+                                        style="background-color: #eaeaea;" disabled><br>
+                                </div>
+                                <div class="form-group">
+                                    <label for="city">City:</label>
+                                    <input class="form-control" type="text" id="City" name="City"
+                                        style="background-color: #eaeaea;" disabled><br>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="postcode">Postcode:</label>
+                                    <input class="form-control" type="text" id="Postcode" name="Postcode"
+                                        style="background-color: #eaeaea;" disabled><br>
+                                </div>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container pb-5">
+                <h1 class="title text-center pt-5">Shopping Cart</h1>
+                <div class="content" id="cartItems"> </div>
+                <div class="empty-cart-message text-center pb-5" id="none">
+                    <img src="/image/cart.png" alt="Empty Cart" style="width: 300px;">
+                    <h2 class="pb-3">Your cart is empty.</h2>
+                </div>
+                <div class="text-right mt-3" id="total">
+                    <h4 id="Subtotal" class="pb-2">Subtotal: RM 0.00</h4>
+                    <div class="promodiv pb-2">
+                        <h4 id="promocode">Promo code: </h4>
+                        <input class="promoinput" type="text" id="Promocode" name="Promocode">
+                        <button class="btn btn-primary" id="apply">Apply</button>
+                    </div>
+                    <div id="discount_amount" class="discamount"></div>
+                    <div class="promodiv pb-2">
+                        <h4 id="point" class="pr-3">Points: 0 </h4>
+                        <button class="btn btn-primary" id="redeem">Redeem</button>
+                    </div>
+                    <div id="point_amount" class="discamount"></div>
+                    <h4 id="Subweight" class="pb-2">Product Weight : 0 g</h4>
+                    <h4 id="ShippingFees" class="pb-2">Shipping Fees: RM 0.00</h4>
+                    <h4 id="OrderTotal" class="pb-2">Order total: RM 0.00</h4>
+                    <button class="btn btn-primary" id="payButton">Pay</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="paymentModalLabel">Payment Options</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div>
+                        <ul class="nav nav-tabs" id="paymentTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="tng-tab" data-toggle="tab" href="#tng" role="tab"
+                                    aria-controls="tng" aria-selected="true">TnG Payment</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="bankCard-tab" data-toggle="tab" href="#bankCard" role="tab"
+                                    aria-controls="bankCard" aria-selected="false">Credit / Debit Card Payment</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="paymentTabContent">
+                            <div class="tab-pane show active" id="tng" role="tabpanel" aria-labelledby="tng-tab">
+                                <h5 class="mt-3">TnG Payment</h5>
+                                <img src="/image/tngqrcode.jpeg" style="width: 250px;">
+                                <form id="tngForm">
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label for="tngReferenceId">Reference ID: </label>
+                                            <input type="text" class="form-control" id="tngReferenceId">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label for="tngReceipt">Receipt: </label>
+                                            <input type="file" class="form-control-file" id="tngReceipt">
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary"
+                                            style="margin-bottom: 20px;">Order</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="tab-pane" id="bankCard" role="tabpanel" aria-labelledby="bankCard-tab">
+                                <h5 class="mt-3">Credit / Debit Card Payment</h5>
+                                <form id="CardForm">
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label for="CardName">Card Name: </label>
+                                            <input type="text" class="form-control" id="CardName">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label for="CardNumber">Card Number: </label>
+                                            <input type="text" class="form-control" id="CardNumber">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group" style="margin-right: 30px;">
+                                            <label for="ExpiryDate">Expiry Date: </label>
+                                            <input type="date" class="form-control" id="ExpiryDate">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="CVV">CVV: </label>
+                                            <input type="number" class="form-control" id="CVV">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label for="CardReferenceId">Reference ID: </label>
+                                            <input type="text" class="form-control" id="CardReferenceId">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group">
+                                            <label for="CardReceipt">Receipt: </label>
+                                            <input type="file" class="form-control-file" id="CardReceipt">
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary"
+                                            style="margin-bottom: 20px;">Order</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
+        <script type="module" src="/js/payment.js"></script>
+        <script type="module" src="/js/logout.js"></script>
+</body>
+
+</html>

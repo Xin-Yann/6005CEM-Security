@@ -1,0 +1,132 @@
+/*header*/
+.header{
+    margin: auto;
+    text-align: center;
+}
+
+.search{
+    display: flex;
+    padding-left: 165px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.head{
+    background-color: white !important;
+    justify-content: center;
+    flex-wrap: nowrap;
+    display: flex;
+    margin-right: -15px;
+    margin-left: -15px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+
+.fa{
+    padding-left: 15px;
+    color: #01647a !important;
+    font-size: 25px;
+}
+
+.menu{
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+
+}
+
+.menu a{
+    color: #01647a;
+    text-decoration: none;
+    font-family: Catty Pillow Demo;
+    font-size: 30px;
+}
+
+
+
+.menu a:hover{
+    color: #a5ecfa;
+    text-decoration: none;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 250px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content a:hover {
+    background-color: #01647a;
+    color: #ffff;
+    text-decoration: none;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+.menu-btn{
+    display: flex;
+}
+
+.title{
+    font-family:'Catty Pillow Demo';
+    color: #01647a;
+}
+
+.col-lg-8, .col-lg-4{
+    display: flex;
+    align-items: center;
+}
+
+.col-lg-4{
+    justify-content: flex-end;
+}
+
+.container{
+    max-width: 1400px !important;
+}
+
+/*footer*/
+.foot, h3{
+    background-color: #01647a !important;
+    color:#fff !important;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.foot a{
+    color:#fff;
+}
+
+.col-sm-12 fa{
+    font-size:20px;
+}
+
+

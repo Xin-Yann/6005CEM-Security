@@ -1,0 +1,80 @@
+.product-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.product {
+    width: calc(32.4% - 20px);
+    box-sizing: border-box;
+    padding: 20px;
+    background-color: #e4d5db;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+    border-radius: 25px;
+    margin: 15px;
+}
+
+.categoryheader{
+	text-align: center;
+    font-family: Catty Pillow Demo;
+    font-size: 50px;
+	padding-top: 40px;
+}
+
+.modal-dialog{
+	max-width: 700px;
+}
+
+.modal-body{
+	padding: 1.5rem;
+}
+
+.quantity-input{
+	width: 50px;
+	text-align: center;
+	border: none;
+	background: none;
+}
+
+.product-image{
+    width: 250px;
+    height: 250px;
+    display: block;
+    margin: auto;
+}
+
+.price-quantity{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.form-control {
+    display: inline;
+    background-color: #fff;
+    height: 40px;
+    width: 200px;
+    padding-left: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    color: #151515;
+    border: 1px solid #e5e5e5;
+    border-radius: 40px;
+    transition: 0.2s all;
+}
+
+.type{
+    padding-left: 15px;
+}
+
+.quantity-input {
+    -webkit-appearance: none; 
+    -moz-appearance: textfield; 
+    appearance: none; 
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
