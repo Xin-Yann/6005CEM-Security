@@ -26,13 +26,8 @@ auth.onAuthStateChanged(async (user) => {
             await displayCartItems(userId); 
             await getCartData(userId);
             console.log("User authenticated. User ID:", userId);
-
-            const userEmail = sessionStorage.getItem('userEmail');
-            if (userEmail) {
-                fetchAndDisplayPersonalDetails(userEmail);
-            } else {
-                console.log('No user email found in session storage.');
-            }
+            fetchAndDisplayPersonalDetails(userId);
+        
         } else {
             console.log('No user is authenticated. Redirecting to login page.');
             window.location.href = "/html/login.html";
@@ -58,11 +53,9 @@ function handleCartClick() {
 
 
 // Function to fetch and display personal details
-async function fetchAndDisplayPersonalDetails(email) {
+async function fetchAndDisplayPersonalDetails(userId) {
     try {
-        console.log(`Fetching details for email: ${email}`);
-
-        const q = query(collection(db, 'users'), where('email', '==', email));
+        const q = query(collection(db, 'users'), where('userId', '==', userId));
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {

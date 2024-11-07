@@ -6,10 +6,7 @@
       "type": "shell",
       "command": "npx",
       "args": [
-        "http-server",
-        "${workspaceFolder}",
-        "-p",
-        "8080"
+        "server.js"
       ],
       "isBackground": true,
       "group": "build",

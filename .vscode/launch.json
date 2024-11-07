@@ -6,7 +6,7 @@
         "name": "Launch Chrome",
         "type": "chrome",
         "request": "launch",
-        "url": "http://localhost:8080/html/home.html",
+        "url": "https://localhost:8080/html/home.html",
         "webRoot": "${workspaceFolder}"
       }
     ]
