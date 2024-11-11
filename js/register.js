@@ -17,7 +17,6 @@ document.getElementById('signUpButton').addEventListener('click', async () => {
         const post = document.getElementById('Postcode').value.trim();
         const checkbox = document.getElementById('checkbox');
 
-
         // Check if any field is empty
         if (!name || !email || !password || !contact || !address || !state || !city || !post) {
             window.alert("Please fill in all the details.");
@@ -26,6 +25,7 @@ document.getElementById('signUpButton').addEventListener('click', async () => {
 
         const uppercase = /[A-Z]/;
         const lowercase = /[a-z]/;
+        const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (password.length < 8 || !uppercase.test(password) || !lowercase.test(password)) {
             window.alert("Password must be at least 8 characters long and contain at least one uppercase and one lowercase character");
@@ -34,6 +34,14 @@ document.getElementById('signUpButton').addEventListener('click', async () => {
 
         if (!checkbox.checked) {
             window.alert('You must agree to the Privacy Policy & T&C.');
+            return;
+        }
+
+        if (email.endsWith('@staff.com')) {
+            window.alert('Invalid Email');
+            return;
+        } else if (!emailFormat.test(email)) {
+            window.alert('Invalid Email');
             return;
         }
 
@@ -49,7 +57,8 @@ document.getElementById('signUpButton').addEventListener('click', async () => {
             address: address,
             state: state,
             city: city,
-            post: post
+            post: post,
+            points: 0
         });
 
         window.location.href = "../html/home.html";
