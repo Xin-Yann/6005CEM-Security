@@ -60,20 +60,34 @@ async function fetchAndDisplayDeliveryStatus() {
             table.appendChild(thead);
 
             const tbody = document.createElement('tbody');
+            const orders = [];
+            
             querySnapshot.forEach((doc) => {
                 const orderData = doc.data();
                 const orderId = orderData.orderID || 'N/A';
                 const trackingNumber = orderData.trackingNumber || 'N/A';
                 const deliveryStatus = orderData.status || 'Pending';
 
+                orders.push({
+                    orderId: orderId,
+                    trackingNumber: trackingNumber,
+                    deliveryStatus: deliveryStatus,
+                });
+
+            });
+
+            orders.sort((a, b) => b.orderId - a.orderId);
+
+            orders.forEach(order => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${orderId}</td>
-                    <td>${trackingNumber}</td>
-                    <td>${deliveryStatus}</td>                 
+                    <td>${order.orderId}</td>
+                    <td>${order.trackingNumber}</td>
+                    <td>${order.deliveryStatus}</td>                 
                 `;
                 tbody.appendChild(row);
             });
+
             table.appendChild(tbody);
 
             statusContainer.appendChild(table);
