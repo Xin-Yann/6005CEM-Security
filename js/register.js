@@ -199,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const userId = userCredential.user.uid;
 
             await addDoc(collection(db, "users"), {
+                userId: userId,
                 name: name,
                 email: email,
                 contact: contact,
