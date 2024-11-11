@@ -12,11 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Function to fetch and display personal details
-    async function fetchAndDisplayPersonalDetails(email) {
+    async function fetchAndDisplayPersonalDetails(userId) {
         try {
-            console.log(`Fetching details for email: ${email}`);
-
-            const q = query(collection(db, 'users'), where('email', '==', email));
+            const q = query(collection(db, 'users'), where('userId', '==', userId));
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
@@ -44,13 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            const userId = getCurrentUserId();
-            const userEmail = sessionStorage.getItem('userEmail');
-            if (userEmail) {
-                fetchAndDisplayPersonalDetails(userEmail);
-            } else {
-                console.log('No user email found in session storage.');
-            }
+            const userId = getCurrentUserId();  
+            fetchAndDisplayPersonalDetails(userId);
             updateCartItemCount(userId);
 
         } else {
