@@ -18,3 +18,4 @@ const analytics = getAnalytics(app);
 const firestore = getFirestore(app);
 const auth = getAuth(app);
 console.log(app);
+export { app, analytics, firestore, auth };
