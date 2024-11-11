@@ -1,0 +1,78 @@
+#otpModal .modal-content {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#otpModal .modal-header {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #ddd;
+}
+
+#otpModal .modal-body {
+    font-size: 1rem;
+    padding: 1.5rem;
+}
+
+#otpInputs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.otp-input {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: border-color 0.3s ease;
+}
+
+.otp-input:focus {
+    border-color: #ffc107;
+    outline: none;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+}
+
+.modal-footer button {
+    font-size: 1rem;
+    border-radius: 25px;
+}
+
+#verifyOtpButton {
+    background-color: #ffb606;
+    border-color: #ffb606;
+}
+
+#verifyOtpButton:hover {
+    background-color: #e8a700;
+}
+
+button.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+button.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+
+.text-muted {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.modal-dialog {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.btn-close {
+    border: none;
+    background: transparent;
+}
