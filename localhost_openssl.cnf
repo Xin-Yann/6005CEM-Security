@@ -1,0 +1,19 @@
+[ req ]
+default_bits = 2048
+default_keyfile = localhost.key
+distinguished_name = req_distinguished_name
+x509_extensions = v3_ca
+
+[ req_distinguished_name ]
+countryName = MY
+stateOrProvinceName = Penang
+localityName = Bayan Lepas
+organizationName = Pet Mart
+commonName = localhost
+
+[ v3_ca ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = localhost
+DNS.2 = 127.0.0.1
