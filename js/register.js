@@ -26,25 +26,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const post = document.getElementById('Postcode').value.trim();
         const checkbox = document.getElementById('checkbox');
 
-        // Validation for required fields
+        // Validation for required fields and formats
         if (!name || !email || !password || !contact || !address || !state || !city || !post || !checkbox.checked) {
             alert("Please fill in all the details and agree to the terms.");
             return;
         }
 
+        if (email.endsWith('@staff.com') || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            alert('Invalid email address.');
+            return;
+        }
+
         const otpCode = generateOtp();
-        const hashedOtp = CryptoJS.SHA256(otpCode.toString()).toString(); // Hashing the OTP
+        const hashedOtp = CryptoJS.SHA256(otpCode.toString()).toString();
         const expirationTime = Timestamp.fromDate(new Date(Date.now() + 60 * 1000));
 
         try {
-            // Save the hashed OTP and expiration time in Firestore
             await setDoc(doc(db, "otps", email), {
                 otp: hashedOtp,
                 expiresAt: expirationTime,
                 email: email
             });
 
-            // Send OTP via EmailJS
             emailjs.send("service_e5hae3o", "template_2ljm0rm", {
                 name: name,
                 email: email,
@@ -60,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Function to show OTP modal and set focus on the first input
     function showOtpModal(email) {
         const otpModal = new bootstrap.Modal(document.getElementById('otpModal'));
         otpModal.show();
@@ -70,13 +72,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         otpModal._element.addEventListener('hidden.bs.modal', () => {
-            clearOtpInputs(); 
+            clearOtpInputs();
         });
 
         initializeOtp(email); // Start OTP countdown
     }
 
-    // Start OTP countdown timer
+    function initializeOtp(email) {
+        try {
+            const otpDoc = await getDoc(doc(db, "otps", email));
+            if (otpDoc.exists()) {
+                const expiresAt = otpDoc.data().expiresAt.toDate().getTime();
+                startCountdown(expiresAt);
+            }
+        } catch (error) {
+            console.error("Error fetching OTP document", error);
+        }
+    }
+
     function startCountdown(expirationTime) {
         clearInterval(countdownInterval);
         countdownInterval = setInterval(() => {
@@ -96,39 +109,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
-    // Initialize OTP countdown
-    async function initializeOtp(email) {
-        try {
-            const otpDoc = await getDoc(doc(db, "otps", email));
-            if (otpDoc.exists()) {
-                const expiresAt = otpDoc.data().expiresAt.toDate().getTime();
-                startCountdown(expiresAt);
-            }
-        } catch (error) {
-            console.error("Error fetching OTP document", error);
-        }
-    }
-
-    // Function to clear OTP inputs
     function clearOtpInputs() {
         const otpInputs = document.querySelectorAll(".otp-input");
         otpInputs.forEach(input => input.value = "");
-        otpInputs[0].focus();
+        otpInputs[0].focus(); // Set focus to the first input after clearing
     }
 
-    // Handle OTP input
     const otpInputs = document.querySelectorAll(".otp-input");
     otpInputs.forEach((input, index) => {
         input.addEventListener("input", (e) => {
-            input.value = input.value.replace(/[^0-9]/g, "");
+            input.value = input.value.replace(/[^0-9]/g, ""); // Only numbers are allowed
             if (input.value && index < otpInputs.length - 1) otpInputs[index + 1].focus();
         });
         input.addEventListener("keydown", (e) => {
-            if (e.key === "Backspace" && !input.value && index > 0) otpInputs[index - 1].focus();
+            if (e.key === "Backspace" && !input.value && index > 0) otpInputs[index - 1].focus(); // Navigate back on backspace
         });
     });
 
-    // Verify OTP button click handler
     document.getElementById('verifyOtpButton').addEventListener('click', async () => {
         const enteredOtp = Array.from(otpInputs).map(input => input.value).join('');
         const hashedEnteredOtp = CryptoJS.SHA256(enteredOtp).toString();
@@ -158,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Resend OTP handler
     document.getElementById('resendOtp').addEventListener('click', async () => {
         const email = document.getElementById("Email").value.trim();
         const newOtp = generateOtp();
@@ -189,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Complete registration on successful OTP verification
     async function completeRegistration(email) {
         const name = document.getElementById("Name").value.trim();
         const password = document.getElementById("Password").value.trim();
@@ -211,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 state: state,
                 city: city,
                 post: post,
+                points: 0
             });
 
             alert("Registration successful!");
