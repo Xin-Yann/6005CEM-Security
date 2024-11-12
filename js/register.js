@@ -1,12 +1,16 @@
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
+// Initialize Firebase Authentication and Firestore
 const auth = getAuth();
 const db = getFirestore();
 
-document.getElementById('signUpButton').addEventListener('click', async () => {
+// Attach event listener to the Sign-Up button
+document.getElementById('signUpButton').addEventListener('click', async (event) => {
     event.preventDefault();
+
     try {
+        // Get user inputs
         const name = document.getElementById('Name').value.trim();
         const email = document.getElementById('Email').value.trim();
         const password = document.getElementById('Password').value.trim();
@@ -17,7 +21,7 @@ document.getElementById('signUpButton').addEventListener('click', async () => {
         const post = document.getElementById('Postcode').value.trim();
         const checkbox = document.getElementById('checkbox');
 
-        // Check if any field is empty
+        // Validate form fields
         if (!name || !email || !password || !contact || !address || !state || !city || !post) {
             window.alert("Please fill in all the details.");
             return;
@@ -45,10 +49,16 @@ document.getElementById('signUpButton').addEventListener('click', async () => {
             return;
         }
 
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // Hash the password with bcrypt
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Create user with hashed password
+        const userCredential = await createUserWithEmailAndPassword(auth, email, hashedPassword);
 
         const userId = userCredential.user.uid;
 
+        // Add user details to Firestore
         const docRef = await addDoc(collection(db, 'users'), {
             userId: userId,
             name: name,

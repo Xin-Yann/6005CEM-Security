@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/login.css">
+  <!-- bcryptjs library for client-side hashing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
 </head>
 
 <body>
@@ -59,17 +61,12 @@
             </div>
           </div>
           <p class="text-center">Not a member? <a data-toggle="tab" href="register.html">Sign Up</a></p>
+        </form>
       </div>
-      </form>
-
-    </div>
     </div>
   </section>
 
   <script type="module" src="/js/firebase-configs.js"></script>
   <script type="module" src="/js/login.js"></script>
-
-
 </body>
-
 </html>
