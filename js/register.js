@@ -49,17 +49,12 @@ document.getElementById('signUpButton').addEventListener('click', async (event) 
             return;
         }
 
-        // Hash the password with bcrypt
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-        // Create user with hashed password
-        const userCredential = await createUserWithEmailAndPassword(auth, email, hashedPassword);
-
+        // Register user with Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const userId = userCredential.user.uid;
 
-        // Add user details to Firestore
-        const docRef = await addDoc(collection(db, 'users'), {
+        // Save user details to Firestore (excluding password)
+        await addDoc(collection(db, 'users'), {
             userId: userId,
             name: name,
             email: email,
@@ -74,7 +69,6 @@ document.getElementById('signUpButton').addEventListener('click', async (event) 
         window.location.href = "../html/home.html";
 
         console.log('User created with email: ', userCredential.user.email);
-        console.log('Document written with ID (used as user ID): ', docRef.id);
     } catch (error) {
         const errorCode = error.code;
         const errorMessage = error.message;
