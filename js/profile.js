@@ -6,6 +6,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const db = getFirestore();
     const auth = getAuth();
 
+    let timeout;
+    const TIMEOUT_DURATION = 30 * 1000; 
+
+    // Function to start session timeout
+    function startSessionTimeout() {
+        resetTimeout(); 
+        window.addEventListener('mousemove', resetTimeout); 
+        window.addEventListener('keydown', resetTimeout);   
+        window.addEventListener('click', resetTimeout);     
+    }
+
+    // Function to stop session timeout
+    function stopSessionTimeout() {
+        clearTimeout(timeout); 
+        window.removeEventListener('mousemove', resetTimeout);
+        window.removeEventListener('keydown', resetTimeout);
+        window.removeEventListener('click', resetTimeout);
+    }
+
+    // Function to reset the timeout and show the alert
+    function resetTimeout() {
+        clearTimeout(timeout); 
+        timeout = setTimeout(() => {
+            window.alert("The session has expired.");
+            window.location.href = "../html/login.html"; 
+        }, TIMEOUT_DURATION); 
+    }
+
     function getCurrentUserId() {
         const user = auth.currentUser;
         return user ? user.uid : null;
@@ -44,9 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             const userId = getCurrentUserId();  
             fetchAndDisplayPersonalDetails(userId);
+            startSessionTimeout(); 
             updateCartItemCount(userId);
 
         } else {
+            stopSessionTimeout(); 
             console.log('No user is authenticated. Redirecting to login page.');
             window.location.href = "/html/login.html";
         }
@@ -177,5 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    resetTimeout();
 
 });
