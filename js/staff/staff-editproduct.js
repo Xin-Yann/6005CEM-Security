@@ -1,6 +1,8 @@
-import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc, collection, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 const db = getFirestore();
+const auth = getAuth();
 
 // Function to get query parameter by name
 function getQueryParam(param) {
@@ -83,9 +85,16 @@ async function saveProductDetails() {
             product_weight: productWeight,
         };
 
+        // Update the product document in Firestore
         await updateDoc(productDocRef, updatedData);
         alert('Product updated successfully!');
-        
+
+        // Log the action (edit product) to staff_action collection
+        const staffEmail = auth.currentUser?.email;
+        if (staffEmail) {
+            await logStaffAction(staffEmail, "edit product", productId);
+        }
+
         // Redirect to the appropriate category page
         switch (productCategory) {
             case 'dog':
@@ -111,6 +120,21 @@ async function saveProductDetails() {
     } catch (error) {
         console.error('Error saving product details:', error);
         alert('Error saving product details: ' + error.message);
+    }
+}
+
+// Function to log staff action (edit product) to staff_action collection
+async function logStaffAction(email, action, productId) {
+    try {
+        const actionRef = collection(db, 'staff_action', 'product', 'edit');
+        await setDoc(doc(actionRef), {
+            email: email,
+            action: `${action} ${productId}`,
+            time: new Date()
+        });
+        console.log("Staff action logged successfully.");
+    } catch (error) {
+        console.error('Error logging staff action:', error);
     }
 }
 
