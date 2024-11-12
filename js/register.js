@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeOtp(email); // Start OTP countdown
     }
 
-    function initializeOtp(email) {
+    async function initializeOtp(email) {
         try {
             const otpDoc = await getDoc(doc(db, "otps", email));
             if (otpDoc.exists()) {
@@ -199,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const userId = userCredential.user.uid;
 
             await addDoc(collection(db, "users"), {
+                userId: userId,
                 name: name,
                 email: email,
                 contact: contact,
