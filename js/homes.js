@@ -4,10 +4,40 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-aut
 const db = getFirestore();
 const auth = getAuth();
 
+let timeout;
+const TIMEOUT_DURATION = 30 * 1000; 
+
+// Function to start session timeout
+function startSessionTimeout() {
+    resetTimeout(); 
+    window.addEventListener('mousemove', resetTimeout); 
+    window.addEventListener('keydown', resetTimeout);  
+    window.addEventListener('click', resetTimeout);    
+}
+
+// Function to stop session timeout
+function stopSessionTimeout() {
+    clearTimeout(timeout); 
+    window.removeEventListener('mousemove', resetTimeout);
+    window.removeEventListener('keydown', resetTimeout);
+    window.removeEventListener('click', resetTimeout);
+}
+
+
 function getCurrentUserId() {
     const user = auth.currentUser;
     return user ? user.uid : null;
 }
+
+// Function to reset the timeout and show the alert
+function resetTimeout() {
+    clearTimeout(timeout); 
+    timeout = setTimeout(() => {
+        window.alert("The session has expired.");
+        window.location.href = "../html/login.html"; 
+    }, TIMEOUT_DURATION); 
+}
+
 
 auth.onAuthStateChanged(async (user) => {
     try {
@@ -17,9 +47,11 @@ auth.onAuthStateChanged(async (user) => {
                 console.error("Invalid userId:", userId);
                 return;
             }
+            startSessionTimeout(); 
             updateCartItemCount(userId);
             console.log("User authenticated. User ID:", userId);
         } else {
+            stopSessionTimeout(); 
             console.log("User is not authenticated.");
         }
     } catch (error) {
@@ -373,4 +405,6 @@ for (var i = 0; i < dots.length; i++) {
 showSlide(slideIndex);
 
 setTimeout(autoSlide, slideInterval);
+
+resetTimeout();
 
