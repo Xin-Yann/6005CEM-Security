@@ -1,6 +1,8 @@
 import { getFirestore, collection, setDoc, doc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 const db = getFirestore();
+const auth = getAuth();
 
 // Function to get the highest promo_order
 async function getLastPromoOrder() {
@@ -42,6 +44,13 @@ document.getElementById("add").addEventListener("click", async () => {
         });
 
         alert('Promo added successfully!');
+
+        // Log the action (add promo) to staff_action collection
+        const staffEmail = auth.currentUser?.email;
+        if (staffEmail) {
+            await logStaffAction(staffEmail, "add promo", newPromoOrder);
+        }
+
         window.location.reload();
 
     } catch (e) {
@@ -49,3 +58,18 @@ document.getElementById("add").addEventListener("click", async () => {
         alert('Error adding document: ' + e.message);
     }
 });
+
+// Function to log staff action (add promo) to staff_action collection
+async function logStaffAction(email, action, promoOrder) {
+    try {
+        const actionRef = collection(db, 'staff_action', 'promo', 'add');
+        await setDoc(doc(actionRef), {
+            email: email,
+            action: `${action} with order ${promoOrder}`,
+            time: new Date()
+        });
+        console.log("Staff action logged successfully.");
+    } catch (error) {
+        console.error('Error logging staff action:', error);
+    }
+}
