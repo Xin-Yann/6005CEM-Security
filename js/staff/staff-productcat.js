@@ -1,6 +1,8 @@
-import { getFirestore, doc, collection, query, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, doc, collection, query, orderBy, getDocs, deleteDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 const db = getFirestore();
+const auth = getAuth();
 
 function createButton(htmlContent, onClickHandler) {
     const button = document.createElement('button');
@@ -92,16 +94,38 @@ function naturalSort(a, b) {
     return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
 }
 
-// Function to delete product
+// Function to delete product and log the action
 async function deleteProduct(productId, productType) {
     try {
         const productRef = doc(db, `products/cat/${productType}/${productId}`);
         await deleteDoc(productRef);
         alert('Product deleted successfully!');
+        
+        // Log the deletion action in the staff_action collection
+        const staffEmail = auth.currentUser?.email;
+        if (staffEmail) {
+            await logStaffAction(staffEmail, `delete product ${productId}`);
+        }
+
         fetchDataAndDisplay();
     } catch (error) {
         console.error('Error deleting document:', error);
         alert('Error deleting product.');
+    }
+}
+
+// Function to log staff action to staff_action collection
+async function logStaffAction(email, action) {
+    try {
+        const actionRef = collection(db, 'staff_action', 'product', 'delete');
+        await setDoc(doc(actionRef), {
+            email: email,
+            action: action,
+            time: Timestamp.now()
+        });
+        console.log("Staff action logged successfully.");
+    } catch (error) {
+        console.error('Error logging staff action:', error);
     }
 }
 

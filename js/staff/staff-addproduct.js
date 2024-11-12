@@ -1,6 +1,8 @@
-import { getFirestore, collection, setDoc, doc, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, setDoc, doc, getDoc, query, where, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 const db = getFirestore();
+const auth = getAuth();
 
 document.getElementById("add").addEventListener("click", async () => {
     try {
@@ -64,6 +66,13 @@ document.getElementById("add").addEventListener("click", async () => {
         });
 
         alert('Product added successfully!');
+
+        // Log the action (add product) to staff_action collection
+        const staffEmail = auth.currentUser?.email;
+        if (staffEmail) {
+            await logStaffAction(staffEmail, "add product", productId);
+        }
+
         window.location.reload();
 
         console.log('Document written with ID: ', productId);
@@ -72,6 +81,21 @@ document.getElementById("add").addEventListener("click", async () => {
         alert('Error adding document: ' + e.message);
     }
 });
+
+// Function to log staff action (add product) to staff_action collection
+async function logStaffAction(email, action, productId) {
+    try {
+        const actionRef = collection(db, 'staff_action', 'product', 'add');
+        await setDoc(doc(actionRef), {
+            email: email,
+            action: `${action} ${productId}`,
+            time: Timestamp.now()
+        });
+        console.log("Staff action logged successfully.");
+    } catch (error) {
+        console.error('Error logging staff action:', error);
+    }
+}
 
 // Add an event listener to the product category select element
 document.getElementById("product_category").addEventListener("change", function () {

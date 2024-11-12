@@ -1,5 +1,5 @@
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const db = getFirestore();
 const auth = getAuth();
@@ -12,12 +12,11 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-
 function handleProfileClick() {
   if (auth.currentUser) {
-    window.location.href = "/html/profile.html";
+    window.location.href = "/html/staff/staff-profile.html";
   } else {
-    window.location.href = "/html/login.html";
+    window.location.href = "/html/staff/staff-login.html";
   }
 }
 
@@ -26,32 +25,39 @@ if (profile) {
   profile.addEventListener('click', handleProfileClick);
 }
 
-document.getElementById('signOut').addEventListener('click', () => {
-  // Sign out the current user
-  signOut(auth)
-    .then(() => {
-      // Sign-out successful, clear session storage
+document.getElementById('signOut').addEventListener('click', async () => {
+  const user = auth.currentUser;
+
+  if (user) {
+    const userEmail = user.email;
+
+    try {
+      const activityQuery = query(
+        collection(db, 'staff_activity'),
+        where('email', '==', userEmail),
+        where('logoutTime', '==', null)
+      );
+      const querySnapshot = await getDocs(activityQuery);
+
+      if (!querySnapshot.empty) {
+        const docRef = querySnapshot.docs[0].ref;
+
+        await updateDoc(docRef, {
+          logoutTime: Timestamp.now()
+        });
+        console.log('Logout time updated in Firestore');
+      } else {
+        console.log('No active login session found to update logout time.');
+      }
+
+      await signOut(auth);
       sessionStorage.clear();
       console.log('User signed out');
-      window.location.href = "../html/home.html";
+      window.location.href = "/html/staff/staff-login.html";
       window.alert("You have been successfully signed out.");
-    })
-    .catch((error) => {
-      // An error happened.
-      console.error('Sign-out error:', error);
-    });
+    } catch (error) {
+      console.error('Error updating logout time or signing out:', error);
+      window.alert("An error occurred while signing out. Please try again.");
+    }
+  }
 });
-
-// window.addEventListener('beforeunload', (event) => {
-//   // Attempt to sign out the user
-//   signOut(auth)
-//     .then(() => {
-//       // Sign-out successful, clear session storage
-//       sessionStorage.clear();
-//       console.log('User signed out on page close');
-//     })
-//     .catch((error) => {
-//       // An error happened.
-//       console.error('Sign-out error on page close:', error);
-//     });
-// });
