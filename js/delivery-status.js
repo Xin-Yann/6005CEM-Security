@@ -4,6 +4,34 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 const db = getFirestore();
 const auth = getAuth();
 
+let timeout;
+const TIMEOUT_DURATION = 30 * 1000; 
+
+// Function to start session timeout
+function startSessionTimeout() {
+    resetTimeout(); 
+    window.addEventListener('mousemove', resetTimeout); 
+    window.addEventListener('keydown', resetTimeout);   
+    window.addEventListener('click', resetTimeout);    
+}
+
+// Function to stop session timeout
+function stopSessionTimeout() {
+    clearTimeout(timeout); 
+    window.removeEventListener('mousemove', resetTimeout);
+    window.removeEventListener('keydown', resetTimeout);
+    window.removeEventListener('click', resetTimeout);
+}
+
+// Function to reset the timeout and show the alert
+function resetTimeout() {
+    clearTimeout(timeout); 
+    timeout = setTimeout(() => {
+        window.alert("The session has expired.");
+        window.location.href = "../html/login.html"; 
+    }, TIMEOUT_DURATION); 
+}
+
 function getCurrentUserId() {
     const user = auth.currentUser;
     return user ? user.uid : null;
@@ -104,7 +132,9 @@ onAuthStateChanged(auth, (user) => {
         const userId = getCurrentUserId();
         updateCartItemCount(userId);
         fetchAndDisplayDeliveryStatus();
+        startSessionTimeout(); 
     } else {
+        stopSessionTimeout(); 
         console.log('No user is authenticated. Redirecting to login page.');
         window.location.href = "/html/login.html";
     }
@@ -130,3 +160,5 @@ async function updateCartItemCount(userId) {
         console.error("Error updating cart item count:", error);
     }
 }
+
+resetTimeout();

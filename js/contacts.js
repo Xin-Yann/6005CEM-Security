@@ -4,6 +4,34 @@ import { getFirestore, collection, addDoc,doc, getDocs, getDoc, query, where } f
 const db = getFirestore();
 const auth = getAuth();
 
+let timeout;
+const TIMEOUT_DURATION = 30 * 1000; 
+
+// Function to start session timeout
+function startSessionTimeout() {
+    resetTimeout(); 
+    window.addEventListener('mousemove', resetTimeout); 
+    window.addEventListener('keydown', resetTimeout);   
+    window.addEventListener('click', resetTimeout);     
+}
+
+// Function to stop session timeout
+function stopSessionTimeout() {
+    clearTimeout(timeout); 
+    window.removeEventListener('mousemove', resetTimeout);
+    window.removeEventListener('keydown', resetTimeout);
+    window.removeEventListener('click', resetTimeout);
+}
+
+// Function to reset the timeout and show the alert
+function resetTimeout() {
+    clearTimeout(timeout); 
+    timeout = setTimeout(() => {
+        window.alert("The session has expired.");
+        window.location.href = "../html/login.html"; 
+    }, TIMEOUT_DURATION); 
+}
+
 (function () {
     emailjs.init("86kjxi3kBUTZUUwYJ");
 })();
@@ -21,10 +49,12 @@ auth.onAuthStateChanged(async (user) => {
                 console.error("Invalid userId:", userId);
                 return;
             }
+            startSessionTimeout(); 
             updateCartItemCount(userId);
             fetchUserDataFromFirestore(userId);
             console.log("User authenticated. User ID:", userId);
         } else {
+            stopSessionTimeout(); 
             console.log("User is not authenticated.");
         }
     } catch (error) {
@@ -126,6 +156,8 @@ document.getElementById('Submit').addEventListener('click', async (event) => {
         console.error('Error adding document: ', e);
     }
 });
+
+resetTimeout();
 
 
 
