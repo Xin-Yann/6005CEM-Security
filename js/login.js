@@ -1,9 +1,12 @@
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc, Timestamp, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const auth = getAuth();
 const db = getFirestore();
-let countdownInterval; // To handle countdown interval for OTP expiration
+const ATTEMPT_LIMIT = 3;
+const LOCK_DURATION = 15 * 60 * 1000;
+let countdownInterval;
+let lockCountdownInterval;
 
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000);
@@ -25,29 +28,33 @@ document.getElementById('signIn').addEventListener('click', async (event) => {
         return;
     }
 
+    const attemptData = await getDoc(doc(db, "otp_attempts", email));
+    if (attemptData.exists() && attemptData.data().lockUntil?.toDate() > new Date()) {
+        const unlockTime = attemptData.data().lockUntil.toDate().getTime();
+        showOtpModal(email);
+        startLockCountdown(unlockTime, email);
+        return;
+    }
+
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         console.log('User authenticated successfully:', userCredential.user);
 
-        // Generate and hash OTP
         const otpCode = generateOtp();
         const hashedOtp = CryptoJS.SHA256(otpCode.toString()).toString();
         const expirationTime = Timestamp.fromDate(new Date(Date.now() + 60 * 1000));
 
-        // Save OTP in Firestore
         await setDoc(doc(db, "otps", email), {
             otp: hashedOtp,
             expiresAt: expirationTime,
             email: email
         });
 
-        // Send OTP to the user's email via EmailJS
-        emailjs.send("service_e5hae3o", "template_2ljm0rm", {
+        emailjs.send("service_wv3i5aq", "template_ipcct2s", {
             name: "Valued Customer",
             otp: otpCode,
             email: email
         }).then(() => {
-            console.log("OTP sent successfully to:", email);
             showOtpModal(email);
         }).catch((error) => {
             console.error("Failed to send OTP:", error);
@@ -77,6 +84,7 @@ function showOtpModal(email) {
     initializeOtpCountdown(email);
 }
 
+// Clear OTP input fields
 function clearOtpInputs() {
     document.querySelectorAll(".otp-input").forEach(input => input.value = "");
 }
@@ -102,6 +110,45 @@ function startCountdown(expirationTime, email) {
     }, 1000);
 }
 
+// Start lock countdown timer
+function startLockCountdown(unlockTime, email) {
+    clearInterval(countdownInterval);
+    clearInterval(lockCountdownInterval);
+    document.getElementById("verifyOtpButton").disabled = true;
+    document.getElementById('resendOtp').disabled = true;
+    disableOtpInputs();
+
+    lockCountdownInterval = setInterval(async () => {
+        const currentTime = new Date().getTime();
+        const timeLeft = Math.floor((unlockTime - currentTime) / 1000);
+
+        if (timeLeft <= 0) {
+            clearInterval(lockCountdownInterval);
+            enableOtpInputs();
+            document.getElementById("verifyOtpButton").disabled = false;
+            document.getElementById('resendOtp').disabled = false; 
+            await deleteDoc(doc(db, "otp_attempts", email));
+            alert("Your account is unlocked. You can click resend OTP to try again now.");
+            document.getElementById("countdown").textContent = "";
+            document.querySelector(".otp-input:first-of-type").focus();
+        } else {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById("countdown").textContent = `Account locked. Try again in ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }, 1000);
+}
+
+// Disable OTP input fields
+function disableOtpInputs() {
+    document.querySelectorAll(".otp-input").forEach(input => input.disabled = true);
+}
+
+// Enable OTP input fields
+function enableOtpInputs() {
+    document.querySelectorAll(".otp-input").forEach(input => input.disabled = false);
+}
+
 // Initialize OTP countdown
 async function initializeOtpCountdown(email) {
     try {
@@ -119,13 +166,12 @@ async function initializeOtpCountdown(email) {
 async function clearOtp(email) {
     try {
         await deleteDoc(doc(db, "otps", email));
-        console.log("OTP cleared from Firestore.");
     } catch (error) {
         console.error("Error clearing OTP:", error);
     }
 }
 
-// Handle OTP input field navigation
+// OTP input field navigation
 const otpInputs = document.querySelectorAll(".otp-input");
 otpInputs.forEach((input, index) => {
     input.addEventListener("input", (e) => {
@@ -137,28 +183,44 @@ otpInputs.forEach((input, index) => {
     });
 });
 
-// Verify OTP button click handler
+// OTP verification handler
 document.getElementById('verifyOtpButton').addEventListener('click', async () => {
     const enteredOtp = Array.from(otpInputs).map(input => input.value).join('');
     const hashedEnteredOtp = CryptoJS.SHA256(enteredOtp).toString();
     const email = document.getElementById("Email").value.trim();
+    const otpDocRef = doc(db, "otps", email);
+    const attemptDocRef = doc(db, "otp_attempts", email);
 
     try {
-        const otpDocRef = doc(db, "otps", email);
         const otpDoc = await getDoc(otpDocRef);
+        const attemptData = await getDoc(attemptDocRef);
+        let failedAttempts = attemptData.exists() ? attemptData.data().failedAttempts : 0;
+
         if (!otpDoc.exists()) {
             alert("OTP not found. Please request a new OTP.");
             return;
         }
+
         const { otp: storedHashedOtp, expiresAt } = otpDoc.data();
         const isOtpValid = hashedEnteredOtp === storedHashedOtp;
         const isNotExpired = expiresAt.toDate().getTime() > new Date().getTime();
 
         if (isOtpValid && isNotExpired) {
             await clearOtp(email);
+            await deleteDoc(attemptDocRef);
             await loginUser(email);
         } else {
-            alert(isNotExpired ? "Invalid OTP. Please try again." : "OTP has expired. Please request a new one.");
+            failedAttempts++;
+            if (failedAttempts >= ATTEMPT_LIMIT) {
+                const lockUntil = Timestamp.fromDate(new Date(Date.now() + LOCK_DURATION));
+                await setDoc(attemptDocRef, { failedAttempts, lockUntil });
+                startLockCountdown(lockUntil.toDate().getTime(), email);
+                alert("Account locked due to multiple failed attempts. Try again later.");
+            } else {
+                await setDoc(attemptDocRef, { failedAttempts });
+                alert("Invalid OTP. Please try again.");
+                document.querySelector(".otp-input:last-of-type").focus();
+            }
         }
     } catch (error) {
         console.error("OTP verification failed:", error);
@@ -168,8 +230,8 @@ document.getElementById('verifyOtpButton').addEventListener('click', async () =>
 
 // Login user after successful OTP verification
 async function loginUser(email) {
-    sessionStorage.setItem('userEmail', email); 
-    window.location.href = "../html/home.html"; 
+    sessionStorage.setItem('userEmail', email);
+    window.location.href = "../html/home.html";
 }
 
 // Resend OTP handler
@@ -186,7 +248,7 @@ document.getElementById('resendOtp').addEventListener('click', async () => {
             email: email
         });
 
-        emailjs.send("service_e5hae3o", "template_2ljm0rm", {
+        emailjs.send("service_wv3i5aq", "template_ipcct2s", {
             name: "Valued Customer",
             otp: newOtp,
             email: email
@@ -194,7 +256,7 @@ document.getElementById('resendOtp').addEventListener('click', async () => {
             alert("New OTP sent successfully.");
             clearOtpInputs();
             document.getElementById("verifyOtpButton").disabled = false;
-            initializeOtpCountdown(email); // Restart countdown
+            initializeOtpCountdown(email);
             document.querySelector('.otp-input').focus();
         }).catch((error) => {
             console.error("Failed to resend OTP:", error);
