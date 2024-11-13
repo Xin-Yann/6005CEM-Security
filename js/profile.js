@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const auth = getAuth();
 
     let timeout;
-    const TIMEOUT_DURATION = 30 * 1000; 
+    const TIMEOUT_DURATION = 15 * 60 * 1000; 
 
     // Function to start session timeout
     function startSessionTimeout() {
