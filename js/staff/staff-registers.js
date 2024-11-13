@@ -1,5 +1,5 @@
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const db = getFirestore();
 const auth = getAuth();
@@ -20,6 +20,7 @@ document.getElementById('signUp').addEventListener('click', async (event) => {
     const email = document.getElementById('Email').value.trim();
     const password = document.getElementById('Password').value.trim();
     const contact = document.getElementById('Contact').value.trim();
+    const role = document.getElementById('role').value; // Get the selected role
     const checkbox = document.getElementById('checkbox');
 
     const uppercase = /[A-Z]/;
@@ -47,15 +48,16 @@ document.getElementById('signUp').addEventListener('click', async (event) => {
 
     const staffCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-    const docRef = await addDoc(collection(db, 'staffs'), {
+    // Assign the selected role when creating the document in Firestore
+    const docRef = await setDoc(doc(db, 'staffs', staffCredential.user.uid), {
       name: name,
       email: email,
-      contact: contact
+      contact: contact,
+      role: role // Use the selected role
     });
 
     console.log('Staff created with email: ', staffCredential.user.email);
-    console.log('Document written with ID: ', docRef.id);
-    window.location.href = "../staff/staff-home.html";
+    window.location.href = "../staff/staff-login.html"; // Redirect to login page
   } catch (error) {
     const errorCode = error.code;
     const errorMessage = error.message;
