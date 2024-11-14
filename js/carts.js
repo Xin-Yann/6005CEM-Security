@@ -4,6 +4,34 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-aut
 const db = getFirestore();
 const auth = getAuth(); 
 
+let timeout;
+const TIMEOUT_DURATION = 15 * 60 * 1000; 
+
+// Function to start session timeout
+function startSessionTimeout() {
+    resetTimeout(); 
+    window.addEventListener('mousemove', resetTimeout); 
+    window.addEventListener('keydown', resetTimeout);  
+    window.addEventListener('click', resetTimeout);     
+}
+
+// Function to stop session timeout
+function stopSessionTimeout() {
+    clearTimeout(timeout); 
+    window.removeEventListener('mousemove', resetTimeout);
+    window.removeEventListener('keydown', resetTimeout);
+    window.removeEventListener('click', resetTimeout);
+}
+
+// Function to reset the timeout and show the alert
+function resetTimeout() {
+    clearTimeout(timeout); 
+    timeout = setTimeout(() => {
+        window.alert("The session has expired.");
+        window.location.href = "../html/login.html"; 
+    }, TIMEOUT_DURATION); 
+}
+
 function getCurrentUserId() {
     const user = auth.currentUser;
     return user ? user.uid : null;
@@ -17,12 +45,14 @@ auth.onAuthStateChanged(async (user) => {
                 console.error("Invalid userId:", userId);
                 return;
             }
+            startSessionTimeout(); 
             updateCartItemCount(userId);
             await displayCartItems(userId);
             await getCartData(userId);
             await displayLimitedStockMessage(userId);
             console.log("User authenticated. User ID:", userId);
         } else {
+            stopSessionTimeout(); 
         }
     } catch (error) {
         console.error("Error in authentication state change:", error);
@@ -589,3 +619,5 @@ async function updateSubtotal(totalPrice) {
 }
 
 displayCartItems();
+
+resetTimeout();

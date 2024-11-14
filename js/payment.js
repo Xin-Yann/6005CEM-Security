@@ -4,6 +4,34 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-aut
 const db = getFirestore();
 const auth = getAuth(); 
 
+let timeout;
+const TIMEOUT_DURATION = 15 * 60 * 1000; 
+
+// Function to start session timeout
+function startSessionTimeout() {
+    resetTimeout(); 
+    window.addEventListener('mousemove', resetTimeout); 
+    window.addEventListener('keydown', resetTimeout);   
+    window.addEventListener('click', resetTimeout);     
+}
+
+// Function to stop session timeout
+function stopSessionTimeout() {
+    clearTimeout(timeout); 
+    window.removeEventListener('mousemove', resetTimeout);
+    window.removeEventListener('keydown', resetTimeout);
+    window.removeEventListener('click', resetTimeout);
+}
+
+// Function to reset the timeout and show the alert
+function resetTimeout() {
+    clearTimeout(timeout); 
+    timeout = setTimeout(() => {
+        window.alert("The session has expired.");
+        window.location.href = "../html/login.html"; 
+    }, TIMEOUT_DURATION); 
+}
+
 (function () {
     emailjs.init("86kjxi3kBUTZUUwYJ");
 })();
@@ -22,6 +50,7 @@ auth.onAuthStateChanged(async (user) => {
                 return;
             }
 
+            startSessionTimeout(); 
             updateCartItemCount(userId);
             await displayCartItems(userId); 
             await getCartData(userId);
@@ -29,6 +58,7 @@ auth.onAuthStateChanged(async (user) => {
             fetchAndDisplayPersonalDetails(userId);
         
         } else {
+            stopSessionTimeout(); 
             console.log('No user is authenticated. Redirecting to login page.');
             window.location.href = "/html/login.html";
         }
@@ -713,3 +743,5 @@ document.addEventListener('DOMContentLoaded', function() {
         backdrops.forEach(backdrop => backdrop.remove());
     });
 });
+
+resetTimeout();
