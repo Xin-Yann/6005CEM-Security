@@ -30,8 +30,6 @@ document.getElementById('signIn').addEventListener('click', async (event) => {
     const staff = staffCredential.user;
     console.log('Signed in user:', staff);
 
-    sessionStorage.setItem('staffEmail', staff.email);
-
     await logLoginActivity(staff.email);
 
     window.location.href = "staff-home.html";
