@@ -32,6 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const uppercase = /[A-Z]/;
         const lowercase = /[a-z]/;
 
+        const namePattern = /^[A-Za-z\s]+$/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const contactPattern = /^\d{10,11}$/;
+        const postcodePattern = /^\d{5}$/;
+
+        
+
         if (!name || !email || !password || !contact || !address || !state || !city || !post || !checkbox.checked) {
             alert("Please fill in all the details and agree to the terms.");
             return;
@@ -45,6 +52,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (password.length < 8 || !uppercase.test(password) || !lowercase.test(password)) {
             alert("Password must be at least 8 characters long and contain at least one uppercase and one lowercase character");
             return;
+        }
+
+        if (!namePattern.test(name)) {
+            alert('Name should contain only letters and spaces.');
+            return false;
+        }
+
+        if (!emailPattern.test(email)) {
+            alert('Please enter a valid email address.');
+            return false;
+        }
+
+        if (!contactPattern.test(contact)) {
+            alert('Please enter a valid 10 or 11-digit contact number.');
+            return false;
+        }
+
+        if (!postcodePattern.test(post)) {
+            alert('Please enter a valid 5-digit postcode.');
+            return false;
         }
 
         if (!checkbox.checked) {
@@ -172,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(lockCountdownInterval);
         disableOtpInputs(); 
         resendOtpButton.disabled = true;
+        document.getElementById("verifyOtpButton").disabled = true;
 
         lockCountdownInterval = setInterval(async () => {
             const currentTime = new Date().getTime();
@@ -181,9 +209,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(lockCountdownInterval);
                 enableOtpInputs(); 
                 resendOtpButton.disabled = false;
+                document.getElementById("verifyOtpButton").disabled = false;
                 await deleteDoc(doc(db, "otp_attempts", email));
                 alert("Your account is unlocked. You can click resend OTP for try again now.");
                 countdownDisplay.textContent = ""; 
+                clearOtpInputs();
                 document.querySelector(".otp-input:first-of-type").focus();
             } else {
                 const minutes = Math.floor(timeLeft / 60);
@@ -234,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     await setDoc(attemptDocRef, { failedAttempts });
                     alert("Invalid OTP. Please try again.");
-                    document.querySelector(".otp-input:last-of-type").focus();
+                    clearOtpInputs();
                 }
             }
         } catch (error) {

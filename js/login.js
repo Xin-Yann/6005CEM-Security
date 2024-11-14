@@ -130,6 +130,7 @@ function startLockCountdown(unlockTime, email) {
             await deleteDoc(doc(db, "otp_attempts", email));
             alert("Your account is unlocked. You can click resend OTP to try again now.");
             document.getElementById("countdown").textContent = "";
+            clearOtpInputs();
             document.querySelector(".otp-input:first-of-type").focus();
         } else {
             const minutes = Math.floor(timeLeft / 60);
@@ -219,7 +220,8 @@ document.getElementById('verifyOtpButton').addEventListener('click', async () =>
             } else {
                 await setDoc(attemptDocRef, { failedAttempts });
                 alert("Invalid OTP. Please try again.");
-                document.querySelector(".otp-input:last-of-type").focus();
+                clearOtpInputs();
+                document.querySelector(".otp-input:first-of-type").focus();
             }
         }
     } catch (error) {
