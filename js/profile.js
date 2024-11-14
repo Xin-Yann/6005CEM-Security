@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('Name').value = userData.name || '';
                     document.getElementById('Email').value = userData.email || '';
                     document.getElementById('Contact').value = userData.contact || '';
-                    document.getElementById('Points').value = userData.points || '';
+                    document.getElementById('Points').value = userData.points !== undefined ? userData.points : '';
                     document.getElementById('Address').value = userData.address || '';
                     document.getElementById('State').value = userData.state || '';
                     document.getElementById('City').value = userData.city || '';
