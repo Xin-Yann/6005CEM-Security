@@ -1,5 +1,5 @@
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, Timestamp, getDoc,doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const db = getFirestore();
 const auth = getAuth();
@@ -9,6 +9,7 @@ document.getElementById('signIn').addEventListener('click', async (event) => {
   const email = document.getElementById('Email').value;
   const password = document.getElementById('Password').value;
   const checkbox = document.getElementById('checkbox');
+  const selectedRole = document.getElementById('role').value;
 
   if (!email || !password) {
     window.alert('Email and password must be filled out.');
@@ -32,7 +33,26 @@ document.getElementById('signIn').addEventListener('click', async (event) => {
 
     await logLoginActivity(staff.email);
 
-    window.location.href = "staff-home.html";
+    const staffDoc = await getDoc(doc(db, 'staffs', staff.uid));
+    
+    if (staffDoc.exists()) {
+      const role = staffDoc.data().role;
+
+      // Redirect based on role
+      if (selectedRole === 'admin' && role === 'admin') {
+        window.location.href = 'displayData.html'; // Redirect to admin page
+      } else if (selectedRole === 'staff' && role === 'staff') {
+        window.location.href = '../staff/staff-home.html'; // Redirect to staff home page
+      } else {
+        window.location.href = 'accessDenied.html'; // Redirect if the actual role does not match the intended role
+      }
+      
+    } else {
+      window.location.href = 'accessDenied.html'; // Redirect to access denied if user data is missing
+    }
+
+
+    //window.location.href = "staff-home.html";
   } catch (error) {
     const errorCode = error.code;
     const errorMessage = error.message;
