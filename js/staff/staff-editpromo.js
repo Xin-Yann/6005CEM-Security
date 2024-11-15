@@ -96,10 +96,7 @@ async function savePromoDetails() {
 // Function to log staff action (edit promo) to staff_action collection
 async function logStaffAction(email, action, promoOrder) {
     try {
-        // Reference to the 'staff_action' collection and 'product' document
         const actionRef = collection(db, 'staff_action', 'promo', 'edit');
-        
-        // Log action with email, promo description, promo order, and timestamp
         await setDoc(doc(actionRef), {
             email: email,
             action: `${action} with order ${promoOrder}`,
