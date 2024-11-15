@@ -1,5 +1,6 @@
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { getFirestore, collection, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
 const auth = getAuth();
 const db = getFirestore();
 
@@ -53,11 +54,11 @@ document.getElementById('signUp').addEventListener('click', async (event) => {
       });
 
       if (role === 'admin') {
-        window.location.href = 'displayData.html'; // Redirect to admin page
+        window.location.href = 'displayData.html'; 
       } else if (role === 'staff') {
-        window.location.href = '../staff/staff-home.html'; // Redirect to staff home page
+        window.location.href = '../staff/staff-home.html'; 
       }
-      
+
       console.log('User created with email: ', userCredential.user.email);
       console.log('Document written with ID (used as user ID): ', docRef.id);
 

@@ -38,21 +38,18 @@ document.getElementById('signIn').addEventListener('click', async (event) => {
     if (staffDoc.exists()) {
       const role = staffDoc.data().role;
 
-      // Redirect based on role
       if (selectedRole === 'admin' && role === 'admin') {
-        window.location.href = 'displayData.html'; // Redirect to admin page
+        window.location.href = 'displayData.html'; 
       } else if (selectedRole === 'staff' && role === 'staff') {
-        window.location.href = '../staff/staff-home.html'; // Redirect to staff home page
+        window.location.href = '../staff/staff-home.html'; 
       } else {
-        window.location.href = 'accessDenied.html'; // Redirect if the actual role does not match the intended role
+        window.location.href = 'access-denied.html'; 
       }
       
     } else {
-      window.location.href = 'accessDenied.html'; // Redirect to access denied if user data is missing
+      window.location.href = 'access-denied.html'; 
     }
 
-
-    //window.location.href = "staff-home.html";
   } catch (error) {
     const errorCode = error.code;
     const errorMessage = error.message;
