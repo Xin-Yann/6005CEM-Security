@@ -1,8 +1,35 @@
 import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const db = getFirestore();
+const auth = getAuth();
 
 let yearSelect, monthSelect;
+
+// Function to check user role and show/hide admin-only elements
+async function checkUserRole() {
+    const user = auth.currentUser;
+    if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const role = userData.role;
+
+            if (role === "admin") {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+            } else {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            }
+        } else {
+            console.error("User data not found.");
+        }
+    } else {
+        console.error("No authenticated user found.");
+    }
+}
 
 async function fetchMonthlySalesData(year, month) {
     const salesData = {};
@@ -97,4 +124,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateSalesReport();
 
     monthSelect.addEventListener('change', updateSalesReport);
+
+    // Check for user authentication and role to apply RBAC
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            checkUserRole();
+        } else {
+            console.error("User not authenticated.");
+        }
+    });
 });

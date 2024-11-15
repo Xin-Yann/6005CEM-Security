@@ -5,7 +5,32 @@ const db = getFirestore();
 const auth = getAuth(); 
 
 let timeout;
-const TIMEOUT_DURATION = 15 * 60 * 1000; 
+const TIMEOUT_DURATION = 30 * 60 * 1000; 
+
+// Generate a session ID (UUID) for a new session
+function generateSessionID() {
+    const array = new Uint8Array(16); 
+    window.crypto.getRandomValues(array);
+    return [...array].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+
+// Set a session cookie
+function setSessionCookie(sessionID) {
+    document.cookie = `sessionID=${sessionID}; path=/; max-age=${TIMEOUT_DURATION / 1000}`;
+}
+
+// Get session ID from cookies
+function getSessionCookie() {
+    const cookies = document.cookie.split('; ');
+    const sessionCookie = cookies.find(cookie => cookie.startsWith('sessionID='));
+    return sessionCookie ? sessionCookie.split('=')[1] : null;
+}
+
+// Clear the session cookie
+function clearSessionCookie() {
+    document.cookie = `sessionID=; path=/; max-age=0`;
+}
 
 // Function to start session timeout
 function startSessionTimeout() {
@@ -28,6 +53,7 @@ function resetTimeout() {
     clearTimeout(timeout); 
     timeout = setTimeout(() => {
         window.alert("The session has expired.");
+        clearSessionCookie(); 
         window.location.href = "../html/login.html"; 
     }, TIMEOUT_DURATION); 
 }
@@ -50,6 +76,11 @@ auth.onAuthStateChanged(async (user) => {
                 return;
             }
 
+            let sessionID = getSessionCookie();
+            if (!sessionID) {
+                sessionID = generateSessionID();
+                setSessionCookie(sessionID);
+            }
             startSessionTimeout(); 
             updateCartItemCount(userId);
             await displayCartItems(userId); 
@@ -59,6 +90,7 @@ auth.onAuthStateChanged(async (user) => {
         
         } else {
             stopSessionTimeout(); 
+            clearSessionCookie();
             console.log('No user is authenticated. Redirecting to login page.');
             window.location.href = "/html/login.html";
         }

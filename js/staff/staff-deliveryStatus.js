@@ -11,7 +11,7 @@ async function fetchAndDisplayDeliveryStatus() {
         const querySnapshot = await getDocs(q);
 
         const statusContainer = document.getElementById('statusContainer');
-        statusContainer.innerHTML = ''; 
+        statusContainer.innerHTML = '';
 
         if (!querySnapshot.empty) {
             const table = document.createElement('table');
@@ -27,9 +27,11 @@ async function fetchAndDisplayDeliveryStatus() {
                 <tbody></tbody>
             `;
 
+            const rows = [];
+
             querySnapshot.forEach((doc) => {
                 const orderData = doc.data();
-                const orderId = orderData.orderID || 'N/A'; // orderID should be a number
+                const orderId = orderData.orderID || 'N/A';
                 const trackingNumber = orderData.trackingNumber || 'N/A';
                 const deliveryStatus = orderData.status || 'Pending';
 
@@ -52,7 +54,12 @@ async function fetchAndDisplayDeliveryStatus() {
                         ` : '<p style="margin-top: 1rem;">Complete</p>'}
                     </td>
                 `;
+                rows.push({ orderId, row });
+            });
 
+            rows.sort((a, b) => b.orderId - a.orderId);
+
+            rows.forEach(({ row }) => {
                 table.querySelector('tbody').appendChild(row);
             });
 
@@ -94,7 +101,7 @@ async function updateOrderStatus(docId, orderId, trackingNumber) {
 // Function to log staff action
 async function logStaffAction(email, action) {
     try {
-        const actionRef = collection(db, 'staff_action','delivery_status','update');
+        const actionRef = collection(db, 'staff_action', 'delivery_status', 'update');
         const actionDocRef = doc(actionRef);
         await setDoc(actionDocRef, {
             email: email,
