@@ -1,7 +1,6 @@
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, deleteDoc, Timestamp, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-
 const auth = getAuth();
 const db = getFirestore();
 const ATTEMPT_LIMIT = 3;
@@ -303,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error resending OTP:", error);
         }
     });
+
 // Hash the password using SHA-256
 async function hashPassword(password) {
     const encoder = new TextEncoder();
@@ -315,7 +315,6 @@ async function hashPassword(password) {
     return arrayBufferToBase64(hashBuffer);
 }
 
-// Complete the registration process
 async function completeRegistration(email) {
     const name = document.getElementById("Name").value.trim();
     const password = document.getElementById("Password").value.trim();
@@ -326,7 +325,6 @@ async function completeRegistration(email) {
     const post = document.getElementById("Postcode").value.trim();
 
     try {
-        // Create user with Firebase Authentication
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const userId = userCredential.user.uid;
 
@@ -343,7 +341,7 @@ async function completeRegistration(email) {
             state: state,
             city: city,
             post: post,
-            hashedPassword: hashedPassword, // Store the hashed password (not encrypted)
+            hashedPassword: hashedPassword, 
             points: 0
         });
 
