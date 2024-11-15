@@ -1,5 +1,5 @@
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, Timestamp, getDoc,doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
 const db = getFirestore();
 const auth = getAuth();
@@ -9,6 +9,7 @@ document.getElementById('signIn').addEventListener('click', async (event) => {
   const email = document.getElementById('Email').value;
   const password = document.getElementById('Password').value;
   const checkbox = document.getElementById('checkbox');
+  const selectedRole = document.getElementById('role').value;
 
   if (!email || !password) {
     window.alert('Email and password must be filled out.');
@@ -30,11 +31,25 @@ document.getElementById('signIn').addEventListener('click', async (event) => {
     const staff = staffCredential.user;
     console.log('Signed in user:', staff);
 
-    sessionStorage.setItem('staffEmail', staff.email);
-
     await logLoginActivity(staff.email);
 
-    window.location.href = "staff-home.html";
+    const staffDoc = await getDoc(doc(db, 'staffs', staff.uid));
+    
+    if (staffDoc.exists()) {
+      const role = staffDoc.data().role;
+
+      if (selectedRole === 'admin' && role === 'admin') {
+        window.location.href = 'displayData.html'; 
+      } else if (selectedRole === 'staff' && role === 'staff') {
+        window.location.href = '../staff/staff-home.html'; 
+      } else {
+        window.location.href = 'access-denied.html'; 
+      }
+      
+    } else {
+      window.location.href = 'access-denied.html'; 
+    }
+
   } catch (error) {
     const errorCode = error.code;
     const errorMessage = error.message;

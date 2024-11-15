@@ -1,0 +1,110 @@
+/* General Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Table Header */
+thead {
+    background-color: #f4f4f4;
+}
+
+th {
+    padding: 10px 15px;
+    text-align: left;
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+/* Add some space between the sections */
+.table-section {
+    margin-bottom: 30px;
+}
+
+/* Add a spacer between tables */
+.table-spacer {
+    height: 30px;
+}
+
+/* Styling the headers for the table sections */
+h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+/* Table Rows */
+tbody tr {
+    border-bottom: 1px solid #ddd;
+}
+
+/* Table Data Cells */
+td {
+    padding: 8px 15px;
+    text-align: left;
+}
+
+/* Table Row Hover Effect */
+tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Delete Button Styling */
+.delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    white-space: nowrap; /* Prevents text wrap */
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+
+/* No Data Row */
+#no-staff-data-row,
+#no-user-data-row {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
+/* Table Container */
+.table-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+/* Section Header */
+#header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    th, td {
+        padding: 8px;
+    }
+    
+    .delete-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}

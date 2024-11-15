@@ -7,6 +7,31 @@ const auth = getAuth();
 let timeout;
 const TIMEOUT_DURATION = 30 * 1000; 
 
+// Generate a session ID (UUID) for a new session
+function generateSessionID() {
+    const array = new Uint8Array(16); 
+    window.crypto.getRandomValues(array);
+    return [...array].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+
+// Set a session cookie
+function setSessionCookie(sessionID) {
+    document.cookie = `sessionID=${sessionID}; path=/; max-age=${TIMEOUT_DURATION / 1000}`;
+}
+
+// Get session ID from cookies
+function getSessionCookie() {
+    const cookies = document.cookie.split('; ');
+    const sessionCookie = cookies.find(cookie => cookie.startsWith('sessionID='));
+    return sessionCookie ? sessionCookie.split('=')[1] : null;
+}
+
+// Clear the session cookie
+function clearSessionCookie() {
+    document.cookie = `sessionID=; path=/; max-age=0`;
+}
+
 // Function to start session timeout
 function startSessionTimeout() {
     resetTimeout(); 
@@ -34,6 +59,7 @@ function resetTimeout() {
     clearTimeout(timeout); 
     timeout = setTimeout(() => {
         window.alert("The session has expired.");
+        clearSessionCookie(); 
         window.location.href = "../html/login.html"; 
     }, TIMEOUT_DURATION); 
 }
@@ -47,11 +73,18 @@ auth.onAuthStateChanged(async (user) => {
                 console.error("Invalid userId:", userId);
                 return;
             }
+
+            let sessionID = getSessionCookie();
+            if (!sessionID) {
+                sessionID = generateSessionID();
+                setSessionCookie(sessionID);
+            }
             startSessionTimeout(); 
             updateCartItemCount(userId);
             console.log("User authenticated. User ID:", userId);
         } else {
             stopSessionTimeout(); 
+            clearSessionCookie();
             console.log("User is not authenticated.");
         }
     } catch (error) {
