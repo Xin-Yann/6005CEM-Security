@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff & User Data</title>
     <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/staff/displayData.css"> 
+    <link rel="stylesheet" href="/css/staff/displayData.css">
     <link rel="stylesheet" href="/css/staff/staff-nav.css">
 </head>
+
 <body>
-     <!-- Topbar Start -->
-     <div class="container-fluid">
+    <!-- Topbar Start -->
+    <div class="container-fluid">
         <div class="row align-items-center py-3 px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
                 <a href="" class="text-decoration-none">
@@ -53,7 +55,7 @@
                                 </div>
                             </div>
 
-                            <a href="/html/staff/staff-offerdetails.html"  class="nav-item nav-link">OFFER DETAILS</a>
+                            <a href="/html/staff/staff-offerdetails.html" class="nav-item nav-link">OFFER DETAILS</a>
                             <a href="/html/staff/staff-orderhistory.html" class="nav-item nav-link">ORDER HISTORY</a>
                             <a href="/html/staff/staff-deliveryStatus.html" class="nav-item nav-link">DELIVERY
                                 STATUS</a>
@@ -76,224 +78,58 @@
         <h1>Staff and User Data</h1>
     </div>
     <!-- Staff Data Section -->
-<div class="table-section">
-    <h2>Staff Data</h2>
-    <table id="staff-table" border="1">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Contact</th>
-                <th>Actions</th> 
-            </tr>
-        </thead>
-        <tbody>
-            <tr id="no-staff-data-row">
-                <td colspan="4" style="text-align: center;">No staff data available</td> <!-- Adjusted colspan to 5 -->
-            </tr>
-        </tbody>
-    </table>
-</div>
+    <div class="container">
+        <div class="table-section">
+            <h2>Staff Data</h2>
+            <table id="staff-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="no-staff-data-row">
+                        <td colspan="4" style="text-align: center;">No staff data available</td>
+                        <!-- Adjusted colspan to 5 -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
 
-    <!-- Spacer between tables -->
-    <div class="table-spacer"></div>
+        <!-- Spacer between tables -->
+        <div class="table-spacer"></div>
 
-    <!-- User Data Section -->
-    <div class="table-section">
-        <h2>User Data</h2> <!-- Added header for user data -->
-        <table id="user-table" border="1">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Contact</th>
-                    <th>Address</th>
-                    <th>City</th>
-                    <th>Post</th>
-                    <th>State</th>
-                    <th>User ID</th>
-                    <th>Actions</th> <!-- Added Actions column for delete button -->
-                </tr>
-            </thead>
-            <tbody>
-                <tr id="no-user-data-row">
-                    <td colspan="9" style="text-align: center;">No user data available</td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- User Data Section -->
+        <div class="table-section">
+            <h2>User Data</h2> <!-- Added header for user data -->
+            <table id="user-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Address</th>
+                        <th>City</th>
+                        <th>Post</th>
+                        <th>State</th>
+                        <th>User ID</th>
+                        <th>Actions</th> <!-- Added Actions column for delete button -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="no-user-data-row">
+                        <td colspan="9" style="text-align: center;">No user data available</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <script type="module">
-        // Firebase Firestore and Auth imports
-        import { getFirestore, collection, getDocs, query, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const db = getFirestore();
-            const auth = getAuth();
-
-            // Function to fetch and display multiple staff details
-            async function fetchAndDisplayMultipleStaffDetails() {
-                try {
-                    console.log('Fetching details for all staff');
-
-                    // Query to get all documents from 'staffs' collection
-                    const q = query(collection(db, 'staffs'));
-                    const querySnapshot = await getDocs(q);
-
-                    const noStaffDataRow = document.getElementById('no-staff-data-row');
-
-                    if (!querySnapshot.empty) {
-                        // Hide the "no staff data" row
-                        noStaffDataRow.style.display = 'none';
-
-                        // Iterate over the fetched data and create table rows
-                        querySnapshot.forEach((docSnapshot) => {
-                            const staffData = docSnapshot.data();
-                            const staffId = docSnapshot.id; // Get document ID for deletion
-                            console.log('Staff data fetched:', staffData);
-
-                            // Create a table row for each staff member
-                            const staffRow = document.createElement('tr');
-                            staffRow.innerHTML = `
-                                <td>${staffData.name || ''}</td>
-                                <td>${staffData.email || ''}</td>
-                                <td>${staffData.contact || ''}</td>
-                                <td><button class="delete-btn" data-id="${staffId}">Delete</button></td>
-                            `;
-                            document.getElementById('staff-table').querySelector('tbody').appendChild(staffRow);
-                        });
-                    } else {
-                        // Show the "no data" row if there are no staff records
-                        noStaffDataRow.style.display = 'table-row';
-                    }
-                } catch (error) {
-                    console.error('Error fetching staff details:', error);
-                }
-            }
-
-            // Function to fetch and display multiple user details
-            async function fetchAndDisplayMultipleUserDetails() {
-                try {
-                    console.log('Fetching details for all users');
-
-                    // Query to get all documents from 'users' collection
-                    const q = query(collection(db, 'users'));
-                    const querySnapshot = await getDocs(q);
-
-                    const noUserDataRow = document.getElementById('no-user-data-row');
-
-                    if (!querySnapshot.empty) {
-                        // Hide the "no user data" row
-                        noUserDataRow.style.display = 'none';
-
-                        // Iterate over the fetched data and create table rows
-                        querySnapshot.forEach((docSnapshot) => {
-                            const userData = docSnapshot.data();
-                            const userId = docSnapshot.id; // Get document ID for deletion
-                            console.log('User data fetched:', userData);
-
-                            // Create a table row for each user
-                            const userRow = document.createElement('tr');
-                            userRow.innerHTML = `
-                                <td>${userData.name || ''}</td>
-                                <td>${userData.email || ''}</td>
-                                <td>${userData.contact || ''}</td>
-                                <td>${userData.address || ''}</td>
-                                <td>${userData.city || ''}</td>
-                                <td>${userData.post || ''}</td>
-                                <td>${userData.state || ''}</td>
-                                <td>${userData.userId || ''}</td>
-                                <td><button class="delete-btn" data-id="${userId}">Delete</button></td>
-                            `;
-                            document.getElementById('user-table').querySelector('tbody').appendChild(userRow);
-                        });
-                    } else {
-                        // Show the "no data" row if there are no user records
-                        noUserDataRow.style.display = 'table-row';
-                    }
-                } catch (error) {
-                    console.error('Error fetching user details:', error);
-                }
-            }
-
-            // Function to delete staff data
-            async function deleteStaffData(staffId) {
-                try {
-                    const staffRef = doc(db, 'staffs', staffId);
-                    await deleteDoc(staffRef);
-                    console.log(`Staff data with ID ${staffId} deleted successfully.`);
-                    alert('Staff data deleted successfully.');
-                    location.reload(); // Reload the page to refresh the tables
-                } catch (error) {
-                    console.error('Error deleting staff data:', error);
-                }
-            }
-
-            // Function to delete user data
-            async function deleteUserData(userId) {
-                try {
-                    const userRef = doc(db, 'users', userId);
-                    await deleteDoc(userRef);
-                    console.log(`User data with ID ${userId} deleted successfully.`);
-                    alert('User data deleted successfully.');
-                    location.reload(); // Reload the page to refresh the tables
-                } catch (error) {
-                    console.error('Error deleting user data:', error);
-                }
-            }
-
-            // Event listener for delete buttons
-            document.addEventListener('click', (event) => {
-                if (event.target.classList.contains('delete-btn')) {
-                    const id = event.target.getAttribute('data-id');
-                    const isStaff = event.target.closest('table').id === 'staff-table';
-                    if (isStaff) {
-                        deleteStaffData(id);
-                    } else {
-                        deleteUserData(id);
-                    }
-                }
-            });
-
-            // Check if the user is authenticated
-            onAuthStateChanged(auth, (staff) => {
-                if (staff) {
-                    fetchAndDisplayMultipleStaffDetails(); // Fetch and display staff details
-                    fetchAndDisplayMultipleUserDetails(); // Fetch and display user details
-                } else {
-                    console.log('No staff is authenticated. Redirecting to login page.');
-                    window.location.href = "/html/staff/staff-login.html"; // Redirect to login if not authenticated
-                }
-            });
-        });
-    </script>
-
-    <!-- Firebase configuration and initialization (replace with your actual Firebase config) -->
-    <script type="module">
-       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-       import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
-       import { getFirestore } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-       import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-
-       const firebaseConfig = {
-           apiKey: "AIzaSyA9TiRWsrzJUqh7l7tS_8fcWf6aVpFRlHo",
-           authDomain: "enterprise-project-1fa0a.firebaseapp.com",
-           projectId: "enterprise-project-1fa0a",
-           storageBucket: "enterprise-project-1fa0a.appspot.com",
-           messagingSenderId: "303653703033",
-           appId: "1:303653703033:web:a65a211a5c5ed9e3c7f3a8",
-           measurementId: "G-F37QT7Q3RJ"
-       };
-
-       const app = initializeApp(firebaseConfig);
-       const analytics = getAnalytics(app);
-       const firestore = getFirestore(app);
-       const auth = getAuth(app);
-       console.log(app);
-       export { app, analytics, firestore, auth };
-    </script>
-
+    <script type="module" src="/js/firebase-configs.js"></script>
+    <script type="module" src="/js/staff/displayData.js"></script>
 </body>
+
 </html>
