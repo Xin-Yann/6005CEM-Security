@@ -1,4 +1,4 @@
-import { getFirestore, collection, query, getDocs, updateDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, query, getDocs, updateDoc, doc, orderBy, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 const db = getFirestore();
@@ -11,7 +11,7 @@ async function fetchAndDisplayDeliveryStatus() {
         const querySnapshot = await getDocs(q);
 
         const statusContainer = document.getElementById('statusContainer');
-        statusContainer.innerHTML = ''; 
+        statusContainer.innerHTML = '';
 
         if (!querySnapshot.empty) {
             const table = document.createElement('table');
@@ -27,9 +27,11 @@ async function fetchAndDisplayDeliveryStatus() {
                 <tbody></tbody>
             `;
 
+            const rows = [];
+
             querySnapshot.forEach((doc) => {
                 const orderData = doc.data();
-                const orderId = orderData.orderID || 'N/A'; 
+                const orderId = orderData.orderID || 'N/A';
                 const trackingNumber = orderData.trackingNumber || 'N/A';
                 const deliveryStatus = orderData.status || 'Pending';
 
@@ -40,7 +42,7 @@ async function fetchAndDisplayDeliveryStatus() {
                     <td>${deliveryStatus}</td>
                     <td>
                         ${deliveryStatus !== 'Complete' ? `
-                            <form onsubmit="event.preventDefault(); updateOrderStatus('${doc.id}');">
+                            <form onsubmit="event.preventDefault(); updateOrderStatus('${doc.id}', ${orderId}, '${trackingNumber}');">
                                 <select id="newStatus-${doc.id}">
                                     <option value="Pending" ${deliveryStatus === 'Pending' ? 'selected' : ''}>Pending</option>
                                     <option value="Shipped" ${deliveryStatus === 'Shipped' ? 'selected' : ''}>Shipped</option>
@@ -52,7 +54,12 @@ async function fetchAndDisplayDeliveryStatus() {
                         ` : '<p style="margin-top: 1rem;">Complete</p>'}
                     </td>
                 `;
+                rows.push({ orderId, row });
+            });
 
+            rows.sort((a, b) => b.orderId - a.orderId);
+
+            rows.forEach(({ row }) => {
                 table.querySelector('tbody').appendChild(row);
             });
 
@@ -65,22 +72,45 @@ async function fetchAndDisplayDeliveryStatus() {
     }
 }
 
-// Function to update order status
-async function updateOrderStatus(orderId) {
-    const newStatus = document.getElementById(`newStatus-${orderId}`).value;
+// Function to update order status and log action
+async function updateOrderStatus(docId, orderId, trackingNumber) {
+    const newStatus = document.getElementById(`newStatus-${docId}`).value;
 
     try {
-        const orderRef = doc(db, 'orders', orderId);
+        const orderRef = doc(db, 'orders', docId);
         await updateDoc(orderRef, {
             status: newStatus
         });
 
-        window.alert('Order status updated successfully')
+        // Log the action into staff_action collection
+        const staffEmail = auth.currentUser?.email;
+        if (staffEmail) {
+            await logStaffAction(staffEmail, `update delivery status of order ${orderId}, ${trackingNumber} to ${newStatus}`);
+        } else {
+            console.error("No user is logged in");
+        }
 
-        fetchAndDisplayDeliveryStatus(); 
+        window.alert('Order status updated successfully');
+        fetchAndDisplayDeliveryStatus();
     } catch (error) {
         console.error('Error updating order status:', error);
-        window.alert('Error updating order status')
+        window.alert('Error updating order status');
+    }
+}
+
+// Function to log staff action
+async function logStaffAction(email, action) {
+    try {
+        const actionRef = collection(db, 'staff_action', 'delivery_status', 'update');
+        const actionDocRef = doc(actionRef);
+        await setDoc(actionDocRef, {
+            email: email,
+            action: action,
+            time: Timestamp.now()
+        });
+        console.log("Staff action logged successfully.");
+    } catch (error) {
+        console.error('Error logging staff action:', error);
     }
 }
 
@@ -89,9 +119,9 @@ window.updateOrderStatus = updateOrderStatus;
 // Authenticate user and display delivery status
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        fetchAndDisplayDeliveryStatus(); 
+        fetchAndDisplayDeliveryStatus(); // Display delivery status if user is authenticated
     } else {
         console.log('No user is authenticated. Redirecting to login page.');
-        window.location.href = "/html/login.html";
+        window.location.href = "/html/login.html"; // Redirect to login page if not authenticated
     }
 });
