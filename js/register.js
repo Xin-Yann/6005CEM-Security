@@ -1,6 +1,7 @@
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, deleteDoc, Timestamp, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
+
 const auth = getAuth();
 const db = getFirestore();
 const ATTEMPT_LIMIT = 3;
@@ -302,40 +303,66 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error resending OTP:", error);
         }
     });
+// Hash the password using SHA-256
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const passwordBuffer = encoder.encode(password);
 
-    async function completeRegistration(email) {
-        const name = document.getElementById("Name").value.trim();
-        const password = document.getElementById("Password").value.trim();
-        const contact = document.getElementById("Contact").value.trim();
-        const address = document.getElementById("Address").value.trim();
-        const state = document.getElementById("State").value.trim();
-        const city = document.getElementById("City").value.trim();
-        const post = document.getElementById("Postcode").value.trim();
+    // Perform the hashing operation using SHA-256
+    const hashBuffer = await crypto.subtle.digest('SHA-256', passwordBuffer);
 
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const userId = userCredential.user.uid;
+    // Convert the hash ArrayBuffer to a base64 string
+    return arrayBufferToBase64(hashBuffer);
+}
 
-            await addDoc(collection(db, "users"), {
-                userId: userId,
-                name: name,
-                email: email,
-                contact: contact,
-                address: address,
-                state: state,
-                city: city,
-                post: post,
-                points: 0
-            });
+// Complete the registration process
+async function completeRegistration(email) {
+    const name = document.getElementById("Name").value.trim();
+    const password = document.getElementById("Password").value.trim();
+    const contact = document.getElementById("Contact").value.trim();
+    const address = document.getElementById("Address").value.trim();
+    const state = document.getElementById("State").value.trim();
+    const city = document.getElementById("City").value.trim();
+    const post = document.getElementById("Postcode").value.trim();
 
-            alert("Registration successful!");
-            window.location.href = "../html/home.html";
-        } catch (error) {
-            if (error.code === 'auth/email-already-in-use') {
-                alert("The email address is already in use by another account.");
-            } else {
-                alert("Failed to register. Please try again.");
-            }
+    try {
+        // Create user with Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userId = userCredential.user.uid;
+
+        // Hash the password
+        const hashedPassword = await hashPassword(password);
+
+        // Store the hashed password along with other user details in Firestore
+        await addDoc(collection(db, "users"), {
+            userId: userId,
+            name: name,
+            email: email,
+            contact: contact,
+            address: address,
+            state: state,
+            city: city,
+            post: post,
+            hashedPassword: hashedPassword, // Store the hashed password (not encrypted)
+            points: 0
+        });
+
+        alert("Registration successful!");
+        window.location.href = "../html/home.html";
+    } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+            alert("The email address is already in use by another account.");
+        } else {
+            alert("Failed to register. Please try again.");
         }
     }
+}
+
+// Utility function to convert an ArrayBuffer to a base64 string
+function arrayBufferToBase64(buffer) {
+    const binary = String.fromCharCode.apply(null, new Uint8Array(buffer));
+    return window.btoa(binary);
+}
+
+    
 });
