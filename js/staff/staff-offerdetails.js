@@ -84,13 +84,11 @@ async function deletePromo(promoId, promoOrder) {
         await deleteDoc(promoRef);
         alert('Promo deleted successfully!');
 
-        // Log the deletion to staff_action collection
         const staffEmail = auth.currentUser?.email;
         if (staffEmail) {
             await logStaffAction(staffEmail, `delete promo with order ${promoOrder}`);
         }
 
-        // Refresh the list
         fetchPromosAndDisplay();
     } catch (error) {
         console.error('Error deleting document:', error);
