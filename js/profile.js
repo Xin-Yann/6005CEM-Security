@@ -6,6 +6,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const db = getFirestore();
     const auth = getAuth();
 
+    let timeout;
+    const TIMEOUT_DURATION = 30 * 60 * 1000; 
+
+    // Generate a session ID (UUID) for a new session
+    function generateSessionID() {
+        const array = new Uint8Array(16); 
+        window.crypto.getRandomValues(array);
+        return [...array].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    
+
+    // Set a session cookie
+    function setSessionCookie(sessionID) {
+        document.cookie = `sessionID=${sessionID}; path=/; max-age=${TIMEOUT_DURATION / 1000}`;
+    }
+
+    // Get session ID from cookies
+    function getSessionCookie() {
+        const cookies = document.cookie.split('; ');
+        const sessionCookie = cookies.find(cookie => cookie.startsWith('sessionID='));
+        return sessionCookie ? sessionCookie.split('=')[1] : null;
+    }
+
+    // Clear the session cookie
+    function clearSessionCookie() {
+        document.cookie = `sessionID=; path=/; max-age=0`;
+    }
+
+    // Function to start session timeout
+    function startSessionTimeout() {
+        resetTimeout(); 
+        window.addEventListener('mousemove', resetTimeout); 
+        window.addEventListener('keydown', resetTimeout);   
+        window.addEventListener('click', resetTimeout);     
+    }
+
+    // Function to stop session timeout
+    function stopSessionTimeout() {
+        clearTimeout(timeout); 
+        window.removeEventListener('mousemove', resetTimeout);
+        window.removeEventListener('keydown', resetTimeout);
+        window.removeEventListener('click', resetTimeout);
+    }
+
+    // Function to reset the timeout and show the alert
+    function resetTimeout() {
+        clearTimeout(timeout); 
+        timeout = setTimeout(() => {
+            window.alert("The session has expired.");
+            clearSessionCookie();
+            window.location.href = "../html/login.html"; 
+        }, TIMEOUT_DURATION); 
+    }
+
     function getCurrentUserId() {
         const user = auth.currentUser;
         return user ? user.uid : null;
@@ -25,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('Name').value = userData.name || '';
                     document.getElementById('Email').value = userData.email || '';
                     document.getElementById('Contact').value = userData.contact || '';
-                    document.getElementById('Points').value = userData.points || '';
+                    document.getElementById('Points').value = userData.points !== undefined ? userData.points : '';
                     document.getElementById('Address').value = userData.address || '';
                     document.getElementById('State').value = userData.state || '';
                     document.getElementById('City').value = userData.city || '';
@@ -44,9 +98,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             const userId = getCurrentUserId();  
             fetchAndDisplayPersonalDetails(userId);
+
+            let sessionID = getSessionCookie();
+            if (!sessionID) {
+                sessionID = generateSessionID();
+                setSessionCookie(sessionID);
+            }
+            startSessionTimeout(); 
             updateCartItemCount(userId);
 
         } else {
+            stopSessionTimeout(); 
+            clearSessionCookie();
             console.log('No user is authenticated. Redirecting to login page.');
             window.location.href = "/html/login.html";
         }
@@ -177,5 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    resetTimeout();
 
 });

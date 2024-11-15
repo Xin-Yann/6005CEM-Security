@@ -1,12 +1,13 @@
-import { getFirestore, doc, collection, query, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, doc, collection, query, orderBy, getDocs, deleteDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 const db = getFirestore();
+const auth = getAuth();
 
 // Function to fetch promo data and display it on the webpage
 async function fetchPromosAndDisplay() {
     try {
         const promoCollection = query(collection(db, 'promo'), orderBy('promo_order', 'asc'));
-        
         const promoSnapshot = await getDocs(promoCollection);
 
         const promoContainer = document.getElementById('promo-container');
@@ -62,7 +63,7 @@ async function fetchPromosAndDisplay() {
             deleteButton.textContent = 'Delete';
             deleteButton.classList.add('btn', 'btn-danger');
             deleteButton.addEventListener('click', async () => {
-                await deletePromo(doc.id);
+                await deletePromo(doc.id, promoData.promo_order);
             });
             action2.appendChild(deleteButton);
             tr.appendChild(action2);
@@ -77,15 +78,38 @@ async function fetchPromosAndDisplay() {
 }
 
 // Function to delete promo
-async function deletePromo(promoId) {
+async function deletePromo(promoId, promoOrder) {
     try {
         const promoRef = doc(db, `promo/${promoId}`);
         await deleteDoc(promoRef);
         alert('Promo deleted successfully!');
+
+        // Log the deletion to staff_action collection
+        const staffEmail = auth.currentUser?.email;
+        if (staffEmail) {
+            await logStaffAction(staffEmail, `delete promo with order ${promoOrder}`);
+        }
+
+        // Refresh the list
         fetchPromosAndDisplay();
     } catch (error) {
         console.error('Error deleting document:', error);
         alert('Error deleting promo.');
+    }
+}
+
+// Function to log staff action to staff_action collection
+async function logStaffAction(email, action) {
+    try {
+        const actionRef = collection(db, 'staff_action', 'promo', 'delete');
+        await setDoc(doc(actionRef), {
+            email: email,
+            action: action,
+            time: Timestamp.now()
+        });
+        console.log("Staff action logged successfully.");
+    } catch (error) {
+        console.error('Error logging staff action:', error);
     }
 }
 

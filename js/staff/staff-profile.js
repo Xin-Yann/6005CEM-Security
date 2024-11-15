@@ -30,13 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     onAuthStateChanged(auth, (staff) => {
-        if (staff) {
-            const staffEmail = sessionStorage.getItem('staffEmail');
-            if (Email) {
-                fetchAndDisplayPersonalDetails(staffEmail);
-            } else {
-                console.log('No staff email found in session storage.');
-            }
+        if (staff && staff.email) {
+            fetchAndDisplayPersonalDetails(staff.email);
         } else {
             console.log('No staff is authenticated. Redirecting to login page.');
             window.location.href = "/html/staff/staff-login.html";

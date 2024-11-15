@@ -5,6 +5,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const db = getFirestore();
     const auth = getAuth();
 
+    let timeout;
+    const TIMEOUT_DURATION = 30 * 60 * 1000; 
+
+    // Generate a session ID (UUID) for a new session
+    function generateSessionID() {
+        const array = new Uint8Array(16); 
+        window.crypto.getRandomValues(array);
+        return [...array].map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    
+
+    // Set a session cookie
+    function setSessionCookie(sessionID) {
+        document.cookie = `sessionID=${sessionID}; path=/; max-age=${TIMEOUT_DURATION / 1000}`;
+    }
+
+    // Get session ID from cookies
+    function getSessionCookie() {
+        const cookies = document.cookie.split('; ');
+        const sessionCookie = cookies.find(cookie => cookie.startsWith('sessionID='));
+        return sessionCookie ? sessionCookie.split('=')[1] : null;
+    }
+
+    // Clear the session cookie
+    function clearSessionCookie() {
+        document.cookie = `sessionID=; path=/; max-age=0`;
+    }
+
+    // Function to start session timeout
+    function startSessionTimeout() {
+        resetTimeout(); 
+        window.addEventListener('mousemove', resetTimeout); 
+        window.addEventListener('keydown', resetTimeout);   
+        window.addEventListener('click', resetTimeout);     
+    }
+
+    // Function to stop session timeout
+    function stopSessionTimeout() {
+        clearTimeout(timeout); 
+        window.removeEventListener('mousemove', resetTimeout);
+        window.removeEventListener('keydown', resetTimeout);
+        window.removeEventListener('click', resetTimeout);
+    }
+
+    // Function to reset the timeout and show the alert
+    function resetTimeout() {
+        clearTimeout(timeout); 
+        timeout = setTimeout(() => {
+            window.alert("The session has expired.");
+            clearSessionCookie(); 
+            window.location.href = "../html/login.html"; 
+        }, TIMEOUT_DURATION); 
+    }
+
     function getCurrentUserId() {
         const user = auth.currentUser;
         return user ? user.uid : null;
@@ -161,6 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             const userId = getCurrentUserId();
+            let sessionID = getSessionCookie();
+            if (!sessionID) {
+                sessionID = generateSessionID();
+                setSessionCookie(sessionID);
+            }
+            startSessionTimeout(); 
             updateCartItemCount(userId);
             const userEmail = user.email;
             if (userEmail) {
@@ -169,6 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('No user email found.');
             }
         } else {
+            stopSessionTimeout(); 
+            clearSessionCookie();
             console.log('No user is authenticated. Redirecting to login page.');
             window.location.href = "/html/login.html";
         }
@@ -208,4 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error updating cart item count:", error);
         }
     }
+
+    resetTimeout();
 });
