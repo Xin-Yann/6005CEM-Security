@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/login.css">
   <link rel="stylesheet" href="/css/otpmodule.css">
+  <!-- bcryptjs library for client-side hashing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
 </head>
 
 <body>
@@ -60,10 +62,8 @@
             </div>
           </div>
           <p class="text-center">Not a member? <a data-toggle="tab" href="register.html">Sign Up</a></p>
+        </form>
       </div>
-      </form>
-
-    </div>
     </div>
   </section>
 
@@ -106,8 +106,5 @@
   <script type="module" src="/js/firebase-configs.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
   <script type="module" src="/js/login.js"></script>
-
-
 </body>
-
 </html>
