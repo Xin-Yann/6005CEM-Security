@@ -12,6 +12,7 @@ document.getElementById('signUp').addEventListener('click', async (event) => {
     const password = document.getElementById('Password').value.trim();
     const contact = document.getElementById('Contact').value.trim();
     const checkbox = document.getElementById('checkbox');
+    const role = document.getElementById('role').value;
 
     const uppercase = /[A-Z]/;
     const lowercase = /[a-z]/;
@@ -47,11 +48,16 @@ document.getElementById('signUp').addEventListener('click', async (event) => {
         name: name,
         email: email,
         contact: contact,
+        role: role,
 
       });
 
-      window.location.href = "../staff/staff-home.html";
-
+      if (role === 'admin') {
+        window.location.href = 'displayData.html'; // Redirect to admin page
+      } else if (role === 'staff') {
+        window.location.href = '../staff/staff-home.html'; // Redirect to staff home page
+      }
+      
       console.log('User created with email: ', userCredential.user.email);
       console.log('Document written with ID (used as user ID): ', docRef.id);
 

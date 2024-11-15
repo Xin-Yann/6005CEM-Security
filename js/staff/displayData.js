@@ -1,4 +1,4 @@
-import { getFirestore, collection, getDocs, query, where, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where, getDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,23 +10,18 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             console.log('Fetching details for all staff');
 
-            // Query to get all documents from 'staffs' collection
             const q = query(collection(db, 'staffs'));
             const querySnapshot = await getDocs(q);
 
             const noStaffDataRow = document.getElementById('no-staff-data-row');
 
             if (!querySnapshot.empty) {
-                // Hide the "no staff data" row
                 noStaffDataRow.style.display = 'none';
 
-                // Iterate over the fetched data and create table rows
                 querySnapshot.forEach((docSnapshot) => {
                     const staffData = docSnapshot.data();
-                    const staffId = docSnapshot.id; // Get document ID for deletion
-                    console.log('Staff data fetched:', staffData);
+                    const staffId = docSnapshot.id;
 
-                    // Create a table row for each staff member
                     const staffRow = document.createElement('tr');
                     staffRow.innerHTML = `
                         <td>${staffData.name || ''}</td>
@@ -37,11 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('staff-table').querySelector('tbody').appendChild(staffRow);
                 });
             } else {
-                // Show the "no data" row if there are no staff records
                 noStaffDataRow.style.display = 'table-row';
             }
         } catch (error) {
             console.error('Error fetching staff details:', error);
+        }
+    }
+
+    // Function to delete a user document
+    async function deleteUser(userId) {
+        try {
+            await deleteDoc(doc(db, 'users', userId));
+            console.log(`User with ID ${userId} deleted successfully`);
+            document.querySelector(`[data-id="${userId}"]`).closest('tr').remove();
+        } catch (error) {
+            console.error('Error deleting user:', error);
         }
     }
 
@@ -50,22 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             console.log('Fetching details for all users');
 
-            // Query to get all documents from 'users' collection
             const q = query(collection(db, 'users'));
             const querySnapshot = await getDocs(q);
 
             const noUserDataRow = document.getElementById('no-user-data-row');
 
             if (!querySnapshot.empty) {
-                // Hide the "no user data" row
                 noUserDataRow.style.display = 'none';
 
-                // Iterate over the fetched data and create table rows
                 querySnapshot.forEach((docSnapshot) => {
                     const userData = docSnapshot.data();
-                    console.log('User data fetched:', userData);
+                    const userId = docSnapshot.id;
 
-                    // Create a table row for each user
                     const userRow = document.createElement('tr');
                     userRow.innerHTML = `
                         <td>${userData.name || ''}</td>
@@ -76,11 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${userData.post || ''}</td>
                         <td>${userData.state || ''}</td>
                         <td>${userData.userId || ''}</td>
+                        <td><button class="delete-btn" data-id="${userId}">Delete</button></td>
                     `;
                     document.getElementById('user-table').querySelector('tbody').appendChild(userRow);
+
+                    userRow.querySelector('.delete-btn').addEventListener('click', () => deleteUser(userId));
                 });
             } else {
-                // Show the "no data" row if there are no user records
                 noUserDataRow.style.display = 'table-row';
             }
         } catch (error) {
@@ -91,35 +94,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if the user is authenticated and is an admin
     onAuthStateChanged(auth, (staff) => {
         if (staff) {
-            // Get the current user's UID
             const userUid = staff.uid;
             
-            // Query Firestore to check the user's role (assuming 'role' is stored in the 'staffs' collection)
             const staffRef = doc(db, 'staffs', userUid);
             getDoc(staffRef).then((docSnapshot) => {
                 if (docSnapshot.exists()) {
                     const staffData = docSnapshot.data();
 
-                    // Check if the user's role is 'admin'
                     if (staffData.role === 'admin') {
-                        // Fetch and display staff and user details if the user is an admin
                         fetchAndDisplayMultipleStaffDetails();
                         fetchAndDisplayMultipleUserDetails();
                     } else {
-                        // Redirect non-admin users with access denied message
                         alert('Access Denied. You do not have permission to view this page.');
-                        window.location.href = "/html/staff/staff-home.html"; // Redirect to home or login page
+                        window.location.href = "/html/staff/staff-home.html";
                     }
                 } else {
                     console.log('No staff data found for the authenticated user');
-                    window.location.href = "/html/staff/staff-login.html"; // Redirect to login page if no data
+                    window.location.href = "/html/staff/staff-login.html";
                 }
             }).catch((error) => {
                 console.error('Error checking staff role:', error);
             });
         } else {
             console.log('No staff is authenticated. Redirecting to login page.');
-            window.location.href = "/html/staff/staff-login.html"; // Redirect to login if not authenticated
+            window.location.href = "/html/staff/staff-login.html";
         }
     });
 });

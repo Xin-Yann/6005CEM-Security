@@ -25,7 +25,7 @@ th {
 
 /* Add a spacer between tables */
 .table-spacer {
-    height: 30px; /* Adjust the height for desired spacing */
+    height: 30px;
 }
 
 /* Styling the headers for the table sections */
@@ -34,7 +34,6 @@ h2 {
     font-size: 24px;
     margin-bottom: 15px;
 }
-
 
 /* Table Rows */
 tbody tr {
@@ -62,6 +61,7 @@ tbody tr:hover {
     font-size: 14px;
     border-radius: 4px;
     transition: background-color 0.3s ease;
+    white-space: nowrap; /* Prevents text wrap */
 }
 
 .delete-btn:hover {
