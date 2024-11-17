@@ -12,7 +12,6 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-
 function handleProfileClick() {
   if (auth.currentUser) {
     window.location.href = "/html/profile.html";
@@ -30,28 +29,12 @@ document.getElementById('signOut').addEventListener('click', () => {
   // Sign out the current user
   signOut(auth)
     .then(() => {
-      // Sign-out successful, clear session storage
       sessionStorage.clear();
       console.log('User signed out');
       window.location.href = "../html/home.html";
       window.alert("You have been successfully signed out.");
     })
     .catch((error) => {
-      // An error happened.
       console.error('Sign-out error:', error);
     });
 });
-
-// window.addEventListener('beforeunload', (event) => {
-//   // Attempt to sign out the user
-//   signOut(auth)
-//     .then(() => {
-//       // Sign-out successful, clear session storage
-//       sessionStorage.clear();
-//       console.log('User signed out on page close');
-//     })
-//     .catch((error) => {
-//       // An error happened.
-//       console.error('Sign-out error on page close:', error);
-//     });
-// });

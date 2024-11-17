@@ -2,7 +2,7 @@ import { getFirestore, doc, collection, query, orderBy, getDocs, deleteDoc, setD
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
 
 const db = getFirestore();
-const auth = getAuth(); // Initialize Firebase Authentication
+const auth = getAuth(); 
 
 function createButton(htmlContent, onClickHandler) {
     const button = document.createElement('button');

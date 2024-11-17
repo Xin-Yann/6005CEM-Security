@@ -14,7 +14,6 @@ function generateSessionID() {
     return [...array].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-
 // Set a session cookie
 function setSessionCookie(sessionID) {
     document.cookie = `sessionID=${sessionID}; path=/; max-age=${TIMEOUT_DURATION / 1000}`;
